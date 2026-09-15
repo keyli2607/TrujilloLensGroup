@@ -603,6 +603,137 @@ body {
   transform: scale(1.12);
 }
 
+.brand-text-item {
+  min-width: 170px;
+  height: 66px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  opacity: 1;
+  filter: none;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.brand-text-item span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: clamp(0.8rem, 1.1vw, 1.2rem);
+  color: #0f172a;
+}
+
+.brand-text-item:hover {
+  transform: scale(1.03);
+  opacity: 1;
+}
+
+.brand-trapic {
+  min-width: 260px;
+  height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  position: relative;
+}
+
+.brand-trapic::before {
+  content: "";
+  position: absolute;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, #ffe868 0%, #f5d31d 52%, #f3b000 100%);
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  box-shadow: 0 0 0 8px rgba(246, 210, 39, 0.15);
+}
+
+.brand-trapic::after {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 40px;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  border: 8px solid #091c53;
+  border-top-color: transparent;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  opacity: 0.8;
+}
+
+.brand-trapic span {
+  position: relative;
+  z-index: 1;
+  color: #0a4a97;
+  font-family: "Arial Black", Impact, sans-serif;
+  font-size: clamp(2rem, 2.8vw, 3.1rem);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 68px;
+  text-shadow: 0 4px 0 rgba(0, 0, 0, 0.07);
+}
+
+.brand-trapic span::after {
+  content: "SUNGLASSES";
+  position: absolute;
+  left: 50%;
+  bottom: -20px;
+  transform: translateX(-50%);
+  font-size: 0.42em;
+  letter-spacing: 0.10em;
+  color: #d61d1d;
+  font-family: "Arial Black", Impact, sans-serif;
+}
+
+.brand-darleen {
+  min-width: 420px;
+  height: 110px;
+  border-radius: 999px;
+  background: #e8e8e8;
+  padding: 0 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none;
+  border: none;
+}
+
+.brand-darleen .brand-darleen-word {
+  display: block;
+  font-size: clamp(4.3rem, 5vw, 7rem);
+  font-weight: 900;
+  color: #f553b6;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  font-style: italic;
+  letter-spacing: -0.08em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.brand-darien span { color: #1f2937; font-family: "Segoe UI", Tahoma, sans-serif; }
+.brand-dorian span { color: #1f2937; font-family: "Segoe UI", Tahoma, sans-serif; }
+.brand-freddy span { color: #1f2937; font-family: "Segoe UI", Tahoma, sans-serif; }
+.brand-debby span { color: #1f2937; font-family: "Segoe UI", Tahoma, sans-serif; }
+.brand-tomys span { color: #1f2937; font-family: "Segoe UI", Tahoma, sans-serif; }
+.brand-tododia span { color: #1f2937; font-family: "Segoe UI", Tahoma, sans-serif; }
+
 .trust-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
