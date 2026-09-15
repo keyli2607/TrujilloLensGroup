@@ -416,10 +416,13 @@ function initOptometristaPanel() {
 }
 
 function buildTrackingLink(code) {
+  const storedPublicOrigin = localStorage.getItem('lens_public_tracking_base_url');
   const currentProtocol = window.location.protocol;
-  const siteOrigin = currentProtocol === 'http:' || currentProtocol === 'https:'
-    ? window.location.origin
-    : 'http://localhost:8080';
+  const siteOrigin = storedPublicOrigin || (
+    currentProtocol === 'http:' || currentProtocol === 'https:'
+      ? window.location.origin
+      : 'http://localhost:8080'
+  );
   const trackingUrl = new URL('/seguimiento.html', siteOrigin);
   trackingUrl.hash = '';
   trackingUrl.searchParams.set('codigo', code);
@@ -507,7 +510,7 @@ function renderOptometristaDashboard() {
         <input type="tel" name="phone" placeholder="Teléfono" />
         <input type="text" name="service" placeholder="Servicio / producto" required />
         <textarea name="notes" rows="2" placeholder="Notas del optometrista"></textarea>
-        <button type="submit" class="btn btn-primary">Guardar y abrir seguimiento</button>
+        <button type="submit" class="btn btn-primary">Guardar</button>
       </form>
     </div>
   `;
@@ -575,7 +578,8 @@ function renderOptometristaDashboard() {
     ordersMap[newOrder.code] = newOrder;
     persistOrdersData(ordersMap);
     await saveOrderToServer(newOrder);
-    window.location.assign(buildTrackingLink(newOrder.code));
+
+    renderOptometristaDashboard();
   });
 
   if (loginFormCard) {
