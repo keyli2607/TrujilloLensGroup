@@ -578,29 +578,34 @@ body {
 }
 
 .brand-item {
-  height: 52px;
-  min-width: 140px;
+  height: 64px;
+  min-width: 170px;
+  padding: 0.5rem 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: grayscale(100%);
-  opacity: 0.65;
-  transition: all var(--transition-fast);
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(226, 232, 240, 0.7);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   cursor: pointer;
+  user-select: none;
 }
 
 .brand-item img,
 .brand-item svg {
-  height: 100%;
+  height: 44px;
   width: auto;
-  max-width: 150px;
+  max-width: 145px;
   object-fit: contain;
+  transition: transform 0.25s ease;
 }
 
 .brand-item:hover {
-  filter: grayscale(0%);
-  opacity: 1;
-  transform: scale(1.12);
+  transform: translateY(-3px) scale(1.04);
+  border-color: var(--color-teal-400);
+  box-shadow: 0 8px 20px rgba(20, 184, 166, 0.15);
 }
 
 .brand-text-item {
@@ -703,28 +708,58 @@ body {
 }
 
 .brand-darleen {
-  min-width: 420px;
-  height: 110px;
+  min-width: 330px;
+  height: 120px;
   border-radius: 999px;
-  background: #e8e8e8;
-  padding: 0 1.1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: #f0f0f0;
+  padding: 0 1.2rem;
+  position: relative;
+  overflow: hidden;
   box-shadow: none;
   border: none;
 }
 
-.brand-darleen .brand-darleen-word {
+.brand-darleen .brand-darleen-word,
+.brand-darleen .brand-darleen-kids,
+.brand-darleen .brand-darleen-sub {
+  position: absolute;
   display: block;
-  font-size: clamp(4.3rem, 5vw, 7rem);
+  line-height: 1;
+}
+
+.brand-darleen .brand-darleen-word {
+  left: 26px;
+  top: 10px;
+  font-size: clamp(4rem, 5vw, 6.4rem);
   font-weight: 900;
-  color: #f553b6;
+  color: #f35aa9;
   font-family: "Segoe Print", "Bradley Hand", cursive;
   font-style: italic;
   letter-spacing: -0.08em;
-  line-height: 1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.brand-darleen .brand-darleen-kids {
+  right: 45px;
+  top: 34px;
+  font-size: clamp(1.2rem, 1.7vw, 2.2rem);
+  font-weight: 700;
+  color: #46baf1;
+  font-family: "Segoe Print", "Bradley Hand", cursive;
+  font-style: italic;
+  letter-spacing: -0.03em;
+}
+
+.brand-darleen .brand-darleen-sub {
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  font-size: clamp(0.75rem, 1vw, 1.1rem);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: #1b5fe2;
+  font-weight: 800;
+  font-family: "Segoe UI", Tahoma, sans-serif;
 }
 
 .brand-darien span { color: #1f2937; font-family: "Segoe UI", Tahoma, sans-serif; }

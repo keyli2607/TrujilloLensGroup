@@ -2,8 +2,15 @@ import Image from "next/image";
 
 export default function BrandsSection() {
   const brands = [
-    { name: "Ray-Ban Original", src: "/brands/rayban.svg", alt: "Ray-Ban" },
-    { name: "Oakley Performance", src: "/brands/oakley.svg", alt: "Oakley" },
+    { name: "TROPIC Sunglasses", src: "/brands/tropic.png", alt: "TROPIC Sunglasses" },
+    { name: "SYLVANE Sunglasses", src: "/brands/sylvane.png", alt: "SYLVANE Sunglasses" },
+    { name: "MELY Sunglasses RTD", src: "/brands/mely.png", alt: "MELY Sunglasses" },
+    { name: "Darleen Kids Sunglasses", src: "/brands/darleen.png", alt: "Darleen Kids" },
+    { name: "DEBBY Sunglassss Kids", src: "/brands/debby.png", alt: "DEBBY Kids" },
+    { name: "Tony Lu Sunglasses Kids", src: "/brands/tony_lu.png", alt: "Tony Lu Kids" },
+    { name: "DORIAN Sunglasses Kids", src: "/brands/dorian.png", alt: "DORIAN Sunglasses Kids" },
+    { name: "FREDD Sunglasses Kids", src: "/brands/fredd.png", alt: "FREDD Sunglasses Kids" },
+    { name: "Greisy Sunglasses", src: "/brands/greisy.png", alt: "Greisy Sunglasses" },
     { name: "Fiorella Conte", src: "/brands/fiorellaconte.svg", alt: "Fiorella Conte" },
     { name: "Inka Lens", src: "/brands/inkalens.svg", alt: "Inka Lens" },
     { name: "D&L Optical", src: "/brands/dandl.svg", alt: "D&L" },
@@ -22,32 +29,16 @@ export default function BrandsSection() {
             {/* Set 1 */}
             {brands.map((b, idx) => (
               <div className="brand-item" key={`b1-${idx}`} title={b.name}>
-                <Image src={b.src} alt={b.alt} width={120} height={40} style={{ objectFit: "contain" }} />
+                <Image src={b.src} alt={b.alt} width={130} height={45} style={{ objectFit: "contain" }} />
               </div>
             ))}
 
             {/* Set 2 (Duplicado para animación infinita fluida) */}
-            <div className="brand-item" aria-hidden="true" title="Ray-Ban Original">
-              <Image src="/brands/rayban.svg" alt="Ray-Ban" width={120} height={40} style={{ objectFit: "contain" }} />
-            </div>
-            <div className="brand-item" aria-hidden="true" title="Oakley Performance">
-              <Image src="/brands/oakley.svg" alt="Oakley" width={120} height={40} style={{ objectFit: "contain" }} />
-            </div>
-            <div className="brand-item" aria-hidden="true" title="Vogue Eyewear">
-              <Image src="/brands/vogue.svg" alt="Vogue Eyewear" width={120} height={40} style={{ objectFit: "contain" }} />
-            </div>
-            <div className="brand-item" aria-hidden="true" title="Fiorella Conte">
-              <Image src="/brands/fiorellaconte.svg" alt="Fiorella Conte" width={120} height={40} style={{ objectFit: "contain" }} />
-            </div>
-            <div className="brand-item" aria-hidden="true" title="Inka Lens">
-              <Image src="/brands/inkalens.svg" alt="Inka Lens" width={120} height={40} style={{ objectFit: "contain" }} />
-            </div>
-            <div className="brand-item" aria-hidden="true" title="D&L Optical">
-              <Image src="/brands/dandl.svg" alt="D&L" width={120} height={40} style={{ objectFit: "contain" }} />
-            </div>
-            <div className="brand-item" aria-hidden="true" title="Kevin Collection">
-              <Image src="/brands/kevin.svg" alt="Kevin" width={120} height={40} style={{ objectFit: "contain" }} />
-            </div>
+            {brands.map((b, idx) => (
+              <div className="brand-item" aria-hidden="true" key={`b2-${idx}`} title={b.name}>
+                <Image src={b.src} alt={b.alt} width={130} height={45} style={{ objectFit: "contain" }} />
+              </div>
+            ))}
           </div>
         </div>
 
