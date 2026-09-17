@@ -1043,6 +1043,10 @@ body {
     margin-top: 2rem;
   }
 
+  .catalog-promo-copy {
+    flex: 0 0 auto;
+  }
+
   .catalog-promo-banner .btn {
     width: 100%;
     justify-content: center;

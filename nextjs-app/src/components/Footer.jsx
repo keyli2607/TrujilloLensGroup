@@ -68,25 +68,6 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h4 className="footer-title">Marcas Oficiales</h4>
-            <ul className="footer-links">
-              <li><Link href="/#marcas">TROPIC Sunglasses</Link></li>
-              <li><Link href="/#marcas">SYLVANE Sunglasses</Link></li>
-              <li><Link href="/#marcas">MELY Sunglasses RTD</Link></li>
-              <li><Link href="/#marcas">Darleen Kids Sunglasses</Link></li>
-              <li><Link href="/#marcas">DEBBY Sunglassss Kids</Link></li>
-              <li><Link href="/#marcas">Tony Lu Sunglasses Kids</Link></li>
-              <li><Link href="/#marcas">DORIAN Sunglasses Kids</Link></li>
-              <li><Link href="/#marcas">FREDD Sunglasses Kids</Link></li>
-              <li><Link href="/#marcas">Greisy Sunglasses</Link></li>
-              <li><Link href="/#marcas">Fiorella Conte</Link></li>
-              <li><Link href="/#marcas">Inka Lens</Link></li>
-              <li><Link href="/#marcas">D&L Optical</Link></li>
-              <li><Link href="/#marcas">Kevin Collection</Link></li>
-            </ul>
-          </div>
-
-          <div className="footer-col">
             <h4 className="footer-title">Información Legal</h4>
             <ul className="footer-links">
               <li><Link href="/#contacto">RUC: 20608542191</Link></li>

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 
 export default function AboutSection() {
   return (
@@ -72,9 +71,6 @@ export default function AboutSection() {
               </div>
             </div>
 
-            <Link href="/#contacto" className="btn btn-primary">
-              Visítanos en el Centro de Trujillo
-            </Link>
           </div>
 
           <div className="about-images-col">

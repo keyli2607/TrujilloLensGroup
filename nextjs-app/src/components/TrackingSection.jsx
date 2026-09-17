@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { ORDERS_DB, WHATSAPP_STORE_PHONE } from "../data/orders";
+import { useState, useRef } from "react";
+import { WHATSAPP_STORE_PHONE } from "../data/orders";
 
 const STEP_ICONS = {
   1: (
@@ -58,21 +58,31 @@ export default function TrackingSection() {
   const [searchedCode, setSearchedCode] = useState("");
   const [orderResult, setOrderResult] = useState(null);
   const [notFound, setNotFound] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const resultRef = useRef(null);
 
-  const handleSearch = (searchVal) => {
+  const handleSearch = async (searchVal) => {
     const val = searchVal.trim().toUpperCase();
     if (!val) return;
 
     setSearchedCode(val);
-    const found = ORDERS_DB[val];
+    setIsLoading(true);
+    setOrderResult(null);
+    setNotFound(false);
 
-    if (found) {
-      setOrderResult(found);
-      setNotFound(false);
-    } else {
+    try {
+      const response = await fetch(`/api/orders/${encodeURIComponent(val)}`, { cache: "no-store" });
+      if (!response.ok) {
+        setNotFound(true);
+        return;
+      }
+
+      setOrderResult(await response.json());
+    } catch {
       setOrderResult(null);
       setNotFound(true);
+    } finally {
+      setIsLoading(false);
     }
 
     setTimeout(() => {
@@ -154,7 +164,7 @@ export default function TrackingSection() {
                   <circle cx="11" cy="11" r="8"></circle>
                   <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 </svg>
-                Consultar estado
+                {isLoading ? "Consultando..." : "Consultar estado"}
               </button>
             </div>
 

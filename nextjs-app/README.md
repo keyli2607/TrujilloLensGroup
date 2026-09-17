@@ -24,10 +24,20 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Supabase local
+
+El seguimiento de pedidos consulta `ordenes_laboratorio` en la instancia local de Supabase.
+Duplica `.env.example` como `.env.local` y completa `SUPABASE_ANON_KEY` con la clave anon de tu proyecto local.
+La API local configurada en este workspace es `http://127.0.0.1:44321`.
+
+Los códigos disponibles actualmente se pueden consultar desde PostgreSQL con:
+
+```bash
+docker exec supabase_db_sit-practicas psql -U postgres -d postgres -c "select numero_ticket from public.ordenes_laboratorio order by numero_ticket;"
+```
 
 ## Deploy on Vercel
 
