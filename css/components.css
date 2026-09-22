@@ -1439,6 +1439,11 @@ body {
 /* --------------------------------------------------------------------------
    8. LENS SIMULATOR (TREATMENTS COMPARISON)
    -------------------------------------------------------------------------- */
+
+/* Visibility helpers: mostrar/ocultar versión desktop vs mobile */
+.sim-desktop-only { display: block; }
+.sim-mobile-only  { display: none; }
+
 .simulator-card {
   background: var(--color-white);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;

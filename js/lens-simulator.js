@@ -58,4 +58,37 @@ function setupLensSimulator() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', setupLensSimulator);
+function setupMobileSimulator() {
+  const pills = document.querySelectorAll('.sim-pill');
+  const lensFilterMob = document.getElementById('simulatorLensFilterMob');
+  const simTitleMob = document.getElementById('simActiveTitleMob');
+  const simDescMob = document.getElementById('simActiveDescMob');
+  const simIdealMob = document.getElementById('simActiveIdealMob');
+
+  if (!pills.length) return;
+
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      pills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+
+      const treatmentKey = pill.getAttribute('data-treatment-mob');
+      const data = TREATMENTS_DATA[treatmentKey];
+      if (!data) return;
+
+      // Update filter overlay
+      if (lensFilterMob) lensFilterMob.className = `simulator-lens-filter ${data.filterClass}`;
+
+      // Update info text with smooth transition feel
+      if (simTitleMob) simTitleMob.textContent = data.title;
+      if (simDescMob) simDescMob.textContent = data.description;
+      if (simIdealMob) simIdealMob.textContent = `Ideal para: ${data.idealFor}`;
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupLensSimulator();
+  setupMobileSimulator();
+});
+
