@@ -55,12 +55,6 @@ export default function Header() {
             <Link href="/#inicio" className="nav-link" onClick={closeMenu}>
               Inicio
             </Link>
-            <Link href="/#catalogo" className="nav-link" onClick={closeMenu}>
-              Catálogo
-            </Link>
-            <Link href="/#marcas" className="nav-link" onClick={closeMenu}>
-              Marcas
-            </Link>
             <Link href="/#simulador" className="nav-link" onClick={closeMenu}>
               Simulador de Lunas
             </Link>

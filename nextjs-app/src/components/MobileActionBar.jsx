@@ -9,7 +9,7 @@ export default function MobileActionBar() {
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.pageYOffset + window.innerHeight * 0.4;
-      const sectionIds = ["inicio", "catalogo", "marcas", "simulador", "nosotros", "testimonios", "contacto", "seguimiento"];
+      const sectionIds = ["inicio", "catalogo", "simulador", "nosotros", "testimonios", "contacto", "seguimiento"];
 
       for (const id of sectionIds) {
         const el = document.getElementById(id);

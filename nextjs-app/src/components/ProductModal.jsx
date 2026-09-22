@@ -4,29 +4,16 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { buildWhatsAppProductLink } from "../data/products";
 
 export default function ProductModal({ product, isOpen, onClose }) {
-  const [rotX, setRotX] = useState(0);
-  const [rotY, setRotY] = useState(0);
-  const [zoom, setZoom] = useState(1);
-  const isDraggingRef = useRef(false);
-  const startCoordsRef = useRef({ x: 0, y: 0 });
-
-  const resetView = useCallback(() => {
-    setRotX(0);
-    setRotY(0);
-    setZoom(1);
-  }, []);
-
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      resetView();
     } else {
       document.body.style.overflow = "";
     }
     return () => {
       document.body.style.overflow = "";
     };
-  }, [isOpen, resetView]);
+  }, [isOpen]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -37,41 +24,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
-
-  // Drag handlers
-  const handleStart = (clientX, clientY) => {
-    isDraggingRef.current = true;
-    startCoordsRef.current = { x: clientX, y: clientY };
-  };
-
-  const handleMove = useCallback((clientX, clientY) => {
-    if (!isDraggingRef.current) return;
-    const dx = clientX - startCoordsRef.current.x;
-    const dy = clientY - startCoordsRef.current.y;
-
-    setRotY((prev) => prev + dx * 0.65);
-    setRotX((prev) => Math.max(-40, Math.min(40, prev - dy * 0.45)));
-
-    startCoordsRef.current = { x: clientX, y: clientY };
-  }, []);
-
-  const handleEnd = useCallback(() => {
-    isDraggingRef.current = false;
-  }, []);
-
-  useEffect(() => {
-    const onMouseMove = (e) => handleMove(e.clientX, e.clientY);
-    const onMouseUp = () => handleEnd();
-
-    if (isOpen) {
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
-    }
-    return () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, [isOpen, handleMove, handleEnd]);
 
   if (!isOpen || !product) return null;
 
@@ -95,152 +47,156 @@ export default function ProductModal({ product, isOpen, onClose }) {
         </button>
 
         <div className="modal-content-grid">
-          {/* Interactive 3D Viewer Container */}
+          {/* Product Image Showcase Container */}
+          {/* Columna Izquierda: Información Principal + Imagen del Producto */}
           <div className="modal-viewer-wrapper">
-            <div
-              className="modal-zoom-container"
-              id="modalZoomContainer"
-              style={{ cursor: isDraggingRef.current ? "grabbing" : "grab", touchAction: "none" }}
-              onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
-              onTouchStart={(e) => {
-                if (e.touches.length === 1) {
-                  handleStart(e.touches[0].clientX, e.touches[0].clientY);
-                }
-              }}
-              onTouchMove={(e) => {
-                if (e.touches.length === 1) {
-                  handleMove(e.touches[0].clientX, e.touches[0].clientY);
-                }
-              }}
-              onTouchEnd={handleEnd}
-            >
-              <div className="glasses-3d-stage" id="glasses3dStage">
-                <div
-                  className="glasses-3d-object"
-                  id="glasses3dObject"
-                  style={{
-                    transform: `scale(${zoom}) rotateX(${rotX}deg) rotateY(${rotY}deg)`,
-                    transition: isDraggingRef.current ? "none" : "transform 0.1s ease-out",
-                  }}
-                >
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="modal-zoom-image"
-                    id="modalZoomImage"
-                    draggable={false}
-                  />
+            <div className="modal-main-info">
+              {/* Etiquetas y badges */}
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "0.4rem", marginBottom: "0.4rem" }}>
+                <span className="product-brand" id="modalBrand" style={{ fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700, color: "var(--color-teal-700)" }}>
+                  {product.marca || product.brand || "Lens Group Trujillo"} • {product.categoria || product.categoryLabel || "Monturas"}
+                </span>
+
+                <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
+                  {product.stock_total !== undefined && (
+                    <span className="product-tag-badge" style={{ background: "#0d9488", color: "#fff", padding: "0.2rem 0.5rem", fontSize: "0.75rem" }}>
+                      Stock: {product.stock_total}
+                    </span>
+                  )}
+                  {product.tag && (
+                    <span className="product-tag-badge" id="modalTag" style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem" }}>
+                      {product.tag}
+                    </span>
+                  )}
                 </div>
               </div>
+
+              {/* Título / Nombre del Producto */}
+              <h2 id="modalTitle" style={{ fontSize: "1.45rem", lineHeight: 1.25, margin: "0.2rem 0 0.5rem 0", color: "var(--color-dark-900)" }}>
+                {product.nombre_autogenerado || product.name || product.modelo}
+              </h2>
+
+              {/* Precios */}
+              <div style={{ marginBottom: "0.6rem", display: "flex", alignItems: "baseline", gap: "0.6rem" }}>
+                <span className="product-price" id="modalPrice" style={{ fontSize: "1.85rem", fontWeight: 800, color: "var(--color-teal-700)" }}>
+                  S/ {product.precio_venta ?? product.price}
+                </span>
+                {(product.oldPrice || product.precio_mayorista) && (
+                  <span className="product-price-old" id="modalOldPrice" style={{ fontSize: "1.05rem", textDecoration: "line-through", color: "var(--color-dark-400)" }}>
+                    S/ {product.oldPrice || Math.round((product.precio_venta || 0) * 1.2)}
+                  </span>
+                )}
+              </div>
+
+              {/* Descripción */}
+              <p id="modalDesc" style={{ fontSize: "0.9rem", lineHeight: 1.45, color: "var(--color-dark-600)", margin: 0 }}>
+                {product.description ||
+                  `Montura oftálmica original distribuida por Lens Group Trujillo. Elaborada con acabados de alta durabilidad en ${product.material || "material premium"}, ideal para adaptación de cristales formulados, antirreflejo y protección UV.`}
+              </p>
             </div>
 
-            {/* Bottom Control Bar */}
-            <div className="viewer-bottom-bar">
-              <div className="zoom-slider-wrap">
-                <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--color-dark-500)" }}>Zoom</span>
-                <input
-                  type="range"
-                  min="1"
-                  max="2.5"
-                  step="0.1"
-                  value={zoom}
-                  onChange={(e) => setZoom(parseFloat(e.target.value))}
-                  id="viewerZoomRange"
-                  className="viewer-slider"
-                  title="Aumentar tamaño"
-                />
-              </div>
-              <button
-                type="button"
-                className="viewer-btn"
-                id="btnResetView"
-                title="Restablecer posición original"
-                onClick={resetView}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                  <path d="M3 3v5h5" />
-                </svg>
-                <span>Centrar</span>
-              </button>
+            <div className="modal-zoom-container" id="modalZoomContainer">
+              <img
+                src={product.imagen || product.image || "/images/optics_acetate.jpg"}
+                alt={product.nombre_autogenerado || product.name || product.modelo || "Lente"}
+                className="modal-zoom-image"
+                id="modalZoomImage"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "/images/optics_acetate.jpg";
+                }}
+              />
             </div>
           </div>
 
-          {/* Product Details */}
+          {/* Columna Derecha: Especificaciones Técnicas y Botones */}
           <div className="modal-details">
-            <span
-              className="product-tag-badge"
-              id="modalTag"
-              style={{ display: "inline-block", width: "fit-content", marginBottom: "0.5rem" }}
-            >
-              {product.tag}
-            </span>
-            <span className="product-brand" id="modalBrand" style={{ fontSize: "0.85rem" }}>
-              {product.brand} • {product.categoryLabel}
-            </span>
-            <h2 id="modalTitle" style={{ fontSize: "1.6rem", margin: "0.4rem 0 0.8rem 0" }}>
-              {product.name}
-            </h2>
+            <h3 className="modal-specs-title">Ficha Técnica & Detalles</h3>
 
-            <div style={{ marginBottom: "1rem" }}>
-              <span className="product-price" id="modalPrice" style={{ fontSize: "1.75rem" }}>
-                S/ {product.price}
-              </span>
-              {product.oldPrice && (
-                <span className="product-price-old" id="modalOldPrice" style={{ fontSize: "1.1rem", marginLeft: "0.5rem" }}>
-                  S/ {product.oldPrice}
-                </span>
-              )}
+            {/* Chips de etiquetas adicionales */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem", marginBottom: "1rem" }}>
+              {Array.isArray(product.etiquetas_publico) &&
+                product.etiquetas_publico.map((tag, idx) => (
+                  <span
+                    key={`pub-${idx}`}
+                    className="spec-chip"
+                    style={{ background: "#e0f2fe", color: "#0369a1", fontWeight: "700", fontSize: "0.75rem" }}
+                  >
+                    {tag}
+                  </span>
+                ))}
+              {Array.isArray(product.etiquetas_tecnicas) &&
+                product.etiquetas_tecnicas.map((tag, idx) => (
+                  <span
+                    key={`tec-${idx}`}
+                    className="spec-chip"
+                    style={{ background: "#f1f5f9", color: "#475569", fontWeight: "600", fontSize: "0.75rem" }}
+                  >
+                    {tag}
+                  </span>
+                ))}
             </div>
-
-            <p id="modalDesc" style={{ fontSize: "0.95rem", lineHeight: 1.5, color: "var(--color-dark-600)" }}>
-              {product.description}
-            </p>
 
             {/* Specifications Table */}
             <div className="modal-specs-list" id="modalSpecsList">
-              {product.details && (
-                <>
-                  <div className="modal-spec-row">
-                    <span className="modal-spec-label">Material de Montura</span>
-                    <span className="modal-spec-value">{product.details.material}</span>
-                  </div>
-                  <div className="modal-spec-row">
-                    <span className="modal-spec-label">Tratamiento de Cristales</span>
-                    <span className="modal-spec-value">{product.details.lenses}</span>
-                  </div>
-                  <div className="modal-spec-row">
-                    <span className="modal-spec-label">Nivel de Protección</span>
-                    <span className="modal-spec-value">{product.details.protection}</span>
-                  </div>
-                  <div className="modal-spec-row">
-                    <span className="modal-spec-label">Dimensiones Oficiales</span>
-                    <span className="modal-spec-value">{product.details.measurements}</span>
-                  </div>
-                  <div className="modal-spec-row">
-                    <span className="modal-spec-label">Accesorios Incluidos</span>
-                    <span className="modal-spec-value">{product.details.included}</span>
-                  </div>
-                </>
+              {product.modelo && (
+                <div className="modal-spec-row">
+                  <span className="modal-spec-label">Modelo</span>
+                  <span className="modal-spec-value">{product.modelo}</span>
+                </div>
               )}
+              <div className="modal-spec-row">
+                <span className="modal-spec-label">Material</span>
+                <span className="modal-spec-value">{product.material || product.details?.material || "Acetato / Metal"}</span>
+              </div>
+              {product.codigo_sistema && (
+                <div className="modal-spec-row">
+                  <span className="modal-spec-label">Código de Sistema</span>
+                  <span className="modal-spec-value" style={{ fontFamily: "monospace" }}>{product.codigo_sistema}</span>
+                </div>
+              )}
+              {product.details?.lenses && (
+                <div className="modal-spec-row">
+                  <span className="modal-spec-label">Tratamiento de Cristales</span>
+                  <span className="modal-spec-value">{product.details.lenses}</span>
+                </div>
+              )}
+              {product.details?.protection && (
+                <div className="modal-spec-row">
+                  <span className="modal-spec-label">Nivel de Protección</span>
+                  <span className="modal-spec-value">{product.details.protection}</span>
+                </div>
+              )}
+              {product.details?.measurements && (
+                <div className="modal-spec-row">
+                  <span className="modal-spec-label">Dimensiones Oficiales</span>
+                  <span className="modal-spec-value">{product.details.measurements}</span>
+                </div>
+              )}
+              <div className="modal-spec-row">
+                <span className="modal-spec-label">Garantía y Ajuste</span>
+                <span className="modal-spec-value" style={{ color: "#0d9488" }}>Incluido (Lens Group Trujillo)</span>
+              </div>
             </div>
 
             {/* Direct Purchase Button */}
-            <div style={{ marginTop: "auto", display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+            <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
               <a
-                href={buildWhatsAppProductLink(product)}
+                href={`https://wa.me/51958169535?text=Hola%20Lens%20Group%20Trujillo,%20estoy%20interesado%20en%20el%20modelo%20*${encodeURIComponent(
+                  product.nombre_autogenerado || product.name || product.modelo
+                )}*%20-%20Precio:%20S/%20${product.precio_venta ?? product.price}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 id="modalWhatsAppBtn"
                 className="btn btn-whatsapp"
-                style={{ flex: 1 }}
+                style={{ width: "100%", display: "inline-flex", alignItems: "center", justifyContent: "center", gap: "0.5rem" }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.99.54 1.776.84 2.8.84 3.18 0 5.767-2.587 5.768-5.766.001-3.181-2.586-5.766-5.772-5.766zm8.845 5.767c-.002 4.887-3.974 8.859-8.861 8.859-1.547 0-3.056-.408-4.381-1.182l-4.872 1.278 1.301-4.747c-.854-1.378-1.309-2.977-1.31-4.208 0-4.888 3.973-8.86 8.861-8.86 4.888.001 8.862 3.973 8.862 8.86z" />
                 </svg>
                 Comprar / Consultar en WhatsApp
               </a>
-              <button className="btn btn-outline" onClick={onClose}>
+              <button className="btn btn-outline" onClick={onClose} type="button" style={{ width: "100%" }}>
                 Volver
               </button>
             </div>

@@ -107,7 +107,8 @@
     display: block;
   }
 
-  .nav-actions .btn-contact {
+  .nav-actions .btn-contact,
+  .nav-actions .btn-whatsapp {
     display: none !important;
   }
 
@@ -226,41 +227,125 @@
     transform: translateY(0);
   }
 
-  /* === MODAL 3D === */
+  /* === MODAL DE PRODUCTO (MOBILE & TABLET SLIM) === */
+  .modal-overlay {
+    padding: 0.75rem;
+    align-items: flex-end; /* Efecto bottom-sheet moderno en móviles */
+  }
+
+  .modal-dialog {
+    max-width: 100%;
+    max-height: 88vh;
+    border-radius: 24px 24px 16px 16px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.25);
+  }
+
+  /* Barra de cierre estilizada tipo handle */
+  .modal-dialog::before {
+    content: '';
+    display: block;
+    width: 44px;
+    height: 5px;
+    border-radius: 10px;
+    background: #cbd5e1;
+    margin: 0.65rem auto 0 auto;
+  }
+
+  .modal-close-btn {
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 34px;
+    height: 34px;
+    background: rgba(15, 23, 42, 0.06);
+    color: var(--color-dark-800);
+    border: none;
+  }
+
   .modal-content-grid {
     grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
 
   .modal-viewer-wrapper {
     border-right: none;
-    border-bottom: 1px solid var(--color-dark-200);
+    border-bottom: 1px solid #f1f5f9;
+    padding-top: 0;
+  }
+
+  .modal-main-info {
+    padding: 0.75rem 1.15rem 0.5rem 1.15rem;
+  }
+
+  .modal-main-info h2 {
+    font-size: 1.25rem !important;
+    line-height: 1.25 !important;
+    margin: 0.2rem 0 0.35rem 0;
+  }
+
+  .modal-main-info .product-price {
+    font-size: 1.55rem;
+  }
+
+  .modal-main-info #modalDesc {
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--color-dark-600);
   }
 
   .modal-zoom-container {
-    min-height: 260px;
+    min-height: 200px;
+    max-height: 240px;
+    padding: 1rem 1.25rem;
+    background: radial-gradient(circle at center, #ffffff 0%, #f8fafc 100%);
   }
 
-  .glasses-3d-object {
-    max-width: 260px;
-  }
-
-  .viewer-top-bar,
-  .viewer-bottom-bar {
-    padding: 0.65rem 0.85rem;
-  }
-
-  .view-angles-tabs {
-    overflow-x: auto;
-    max-width: 100%;
-    scrollbar-width: none;
-  }
-
-  .view-angles-tabs::-webkit-scrollbar {
-    display: none;
+  .modal-zoom-image {
+    max-height: 190px;
+    object-fit: contain;
   }
 
   .modal-details {
-    padding: 1.25rem;
+    padding: 1.15rem;
+    background: #ffffff;
+  }
+
+  .modal-specs-title {
+    font-size: 0.95rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .modal-specs-list {
+    margin: 0 0 1.2rem 0;
+    gap: 0.35rem;
+  }
+
+  .modal-spec-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.15rem;
+    padding: 0.45rem 0.65rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border: 1px solid rgba(226, 232, 240, 0.7);
+  }
+
+  .modal-spec-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-dark-400);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .modal-spec-value {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--color-dark-800);
+    line-height: 1.35;
   }
 
   /* === GOOGLE REVIEWS === */
@@ -807,5 +892,36 @@
       animation-duration: 0.01ms !important;
       transition-duration: 0.01ms !important;
     }
+  }
+
+  /* Simulador en móvil */
+  .simulator-card {
+    grid-template-columns: 1fr;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .simulator-viewer {
+    height: 220px;
+  }
+
+  .simulator-controls {
+    padding: 1.25rem;
+  }
+
+  .sim-opt-button {
+    padding: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .simulator-info-bar {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+  }
+
+  .simulator-info-ideal {
+    min-width: unset;
+    width: 100%;
   }
 }

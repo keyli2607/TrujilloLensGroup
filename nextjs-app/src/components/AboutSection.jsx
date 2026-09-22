@@ -75,19 +75,19 @@ export default function AboutSection() {
 
           <div className="about-images-col">
             <Image
-              src="/images/clinic_optometry.jpg"
+              src="/images/optometria-consultorio.jpg"
               alt="Consultorio óptico moderno Lens Group Trujillo"
               width={540}
               height={400}
               className="about-main-img"
-              style={{ width: "100%", height: "auto", objectFit: "cover" }}
+              style={{ width: "100%", objectFit: "cover" }}
             />
 
             <div className="about-sub-card">
               <div style={{ display: "flex", alignContent: "center", alignItems: "center", gap: "0.75rem", marginBottom: "0.5rem" }}>
                 <Image
-                  src="/images/optometrist_doctor.jpg"
-                  alt="Optómetra en Trujillo"
+                  src="/images/doctor-optometrista.jpg"
+                  alt="Doctor optómetra en Lens Group Trujillo"
                   width={48}
                   height={48}
                   style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover" }}
