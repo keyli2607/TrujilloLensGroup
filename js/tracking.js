@@ -10,48 +10,49 @@ const ORDERS_API_URL = '/api/orders';
 
 const ORDER_STATUS_DEFS = {
   1: {
-    statusTitle: 'Pedido Recibido en Óptica',
-    statusBadgeText: 'Pedido Recibido',
+    key: 'cola',
+    statusTitle: 'En Cola de Espera',
+    statusBadgeText: 'Cola',
     statusBadgeClass: 'state-badge-progress',
     statusBoxClass: 'status-box-progress',
-    statusDesc: 'Hemos recepcionado tu prescripción médica y la montura seleccionada. Se ha generado la orden de trabajo para ingresar al laboratorio óptico.',
+    statusDesc: 'Receta registrada y montura asignada. En espera de laboratorio.',
     showPickupBanner: false
   },
   2: {
-    statusTitle: 'En Proceso de Fabricación',
-    statusBadgeText: 'En Fabricación',
+    key: 'proceso',
+    statusTitle: 'En Proceso de Laboratorio',
+    statusBadgeText: 'Proceso',
     statusBadgeClass: 'state-badge-progress',
     statusBoxClass: 'status-box-progress',
-    statusDesc: 'Tus lentes se encuentran en tallado, pulido y montaje según la receta oftálmica registrada.',
+    statusDesc: 'Tallado digital, biselado y control de calidad en laboratorio.',
     showPickupBanner: false
   },
   3: {
-    statusTitle: 'En Control de Calidad Oftálmico',
-    statusBadgeText: 'Control de Calidad',
-    statusBadgeClass: 'state-badge-progress',
-    statusBoxClass: 'status-box-progress',
-    statusDesc: 'Tus cristales están siendo verificados por dioptrías, eje, tratamiento y calidad visual antes del cierre final.',
-    showPickupBanner: false
-  },
-  4: {
+    key: 'listo',
     statusTitle: '¡Listo para Recoger en Tienda!',
-    statusBadgeText: 'Listo para Recoger',
+    statusBadgeText: 'Listo',
     statusBadgeClass: 'state-badge-ready',
     statusBoxClass: 'status-box-ready',
-    statusDesc: '¡Excelentes noticias! Tus lentes han sido minuciosamente calibrados y pasaron el control de calidad oftálmico. Ya se encuentran en nuestro mostrador listos para tu entrega y ajuste facial personalizado.',
+    statusDesc: 'Tu pedido ya está en tienda listo para ser entregado.',
     showPickupBanner: true
-  },
-  5: {
-    statusTitle: 'Pedido Entregado con Éxito',
-    statusBadgeText: 'Entregado',
-    statusBadgeClass: 'state-badge-done',
-    statusBoxClass: 'status-box-done',
-    statusDesc: 'Tu orden ha sido entregada con éxito en nuestra sede. Recuerda que cuentas con 1 año de garantía oficial y mantenimiento preventivo.',
-    showPickupBanner: false
   }
 };
 
-// Mock Database de Órdenes Reales para Lens Group Trujillo
+function mapStatusToStep(val) {
+  if (typeof val === 'number') {
+    if (val <= 1) return 1;
+    if (val === 2 || val === 3) return 2;
+    return 3;
+  }
+  if (!val) return 1;
+  const s = String(val).toLowerCase().trim();
+  if (s.includes('cola')) return 1;
+  if (s.includes('proceso') || s.includes('taller') || s.includes('calidad') || s.includes('laboratorio')) return 2;
+  if (s.includes('listo') || s.includes('recojo') || s.includes('entrega')) return 3;
+  return 1;
+}
+
+// Mock Database de Órdenes Reales para Lens Group Trujillo (Flujo 3 Pasos)
 const ORDERS_DB = {
   'LGT-2025-0342': {
     code: 'LGT-2025-0342',
@@ -60,19 +61,17 @@ const ORDERS_DB = {
     estimatedDate: '10 de Marzo, 2026',
     service: 'Montura Ray-Ban Round Metal + Cristales Antirreflejo Blue Protect UV400',
     branch: 'Galería San Antonio, Jr. Gamarra N° 778, Trujillo 13001',
-    currentStep: 4, // 1: Recibido, 2: En proceso, 3: Calidad, 4: Listo para recoger, 5: Entregado
+    currentStep: 3,
     statusTitle: '¡Listo para Recoger en Tienda!',
-    statusBadgeText: 'Listo para Recoger',
+    statusBadgeText: 'Listo',
     statusBadgeClass: 'state-badge-ready',
     statusBoxClass: 'status-box-ready',
-    statusDesc: '¡Excelentes noticias! Tus lentes han sido minuciosamente calibrados y pasaron el control de calidad oftálmico. Ya se encuentran en nuestro mostrador listos para tu entrega y ajuste facial personalizado.',
+    statusDesc: 'Tu pedido ya está en tienda listo para ser entregado.',
     showPickupBanner: true,
     history: [
-      { step: 1, name: 'Pedido recibido', date: '08 Mar - 10:30 AM', desc: 'Receta registrada en sistema y montura asignada.' },
-      { step: 2, name: 'En proceso', date: '08 Mar - 03:15 PM', desc: 'Tallado digital y biselado de cristales en laboratorio.' },
-      { step: 3, name: 'Control de calidad', date: '09 Mar - 04:30 PM', desc: 'Certificación UV400, antirreflejo y montaje preciso.' },
-      { step: 4, name: 'Listo para recoger', date: '10 Mar - 09:00 AM', desc: 'Disponible en tienda para prueba y ajuste anatómico.' },
-      { step: 5, name: 'Entregado', date: 'Pendiente de recojo', desc: 'Entrega final con paño de microfibra y garantía oficial.' }
+      { step: 1, name: 'Cola', date: '08 Mar - 10:30 AM', desc: 'Receta registrada y montura asignada. En espera de laboratorio.' },
+      { step: 2, name: 'Proceso', date: '08 Mar - 03:15 PM', desc: 'Tallado digital, biselado y control de calidad en laboratorio.' },
+      { step: 3, name: 'Listo', date: '10 Mar - 09:00 AM', desc: 'Tu pedido ya está en tienda listo para ser entregado.' }
     ]
   },
 
@@ -83,19 +82,17 @@ const ORDERS_DB = {
     estimatedDate: '11 de Marzo, 2026',
     service: 'Cristales Fotocromáticos Transition Gen 8 + Montura Titanio Flexible',
     branch: 'Galería San Antonio, Jr. Gamarra N° 778, Trujillo 13001',
-    currentStep: 3,
-    statusTitle: 'En Control de Calidad Oftálmico',
-    statusBadgeText: 'Control de Calidad',
+    currentStep: 2,
+    statusTitle: 'En Proceso de Laboratorio',
+    statusBadgeText: 'Proceso',
     statusBadgeClass: 'state-badge-progress',
     statusBoxClass: 'status-box-progress',
-    statusDesc: 'Tus cristales fotosensibles están en etapa de pruebas de activación solar, verificación de dioptrías y chequeo de eje óptico con lensómetro digital de alta precisión.',
+    statusDesc: 'Tallado digital, biselado y control de calidad en laboratorio.',
     showPickupBanner: false,
     history: [
-      { step: 1, name: 'Pedido recibido', date: '09 Mar - 11:00 AM', desc: 'Receta oftalmológica validada por optómetra.' },
-      { step: 2, name: 'En proceso', date: '09 Mar - 05:20 PM', desc: 'Biselado de precisión computarizado finalizado.' },
-      { step: 3, name: 'Control de calidad', date: '10 Mar - 10:15 AM', desc: 'Pruebas de filtrado UV y alineación de montura.' },
-      { step: 4, name: 'Listo para recoger', date: 'Estimado: 11 Mar', desc: 'Pronto notificaremos su disponibilidad.' },
-      { step: 5, name: 'Entregado', date: 'Pendiente', desc: 'Garantía oficial y certificado de autenticidad.' }
+      { step: 1, name: 'Cola', date: '09 Mar - 11:00 AM', desc: 'Receta registrada y montura asignada. En espera de laboratorio.' },
+      { step: 2, name: 'Proceso', date: '09 Mar - 05:20 PM', desc: 'Tallado digital, biselado y control de calidad en laboratorio.' },
+      { step: 3, name: 'Listo', date: 'Estimado: 11 Mar', desc: 'Tu pedido ya está en tienda listo para ser entregado.' }
     ]
   },
 
@@ -107,18 +104,16 @@ const ORDERS_DB = {
     service: 'Lunas Progresivas Digitales FreeForm + Montura Vogue Eyewear',
     branch: 'Galería San Antonio, Jr. Gamarra N° 778, Trujillo 13001',
     currentStep: 2,
-    statusTitle: 'En Proceso de Fabricación',
-    statusBadgeText: 'En Fabricación',
+    statusTitle: 'En Proceso de Laboratorio',
+    statusBadgeText: 'Proceso',
     statusBadgeClass: 'state-badge-progress',
     statusBoxClass: 'status-box-progress',
-    statusDesc: 'Tus lunas progresivas multifocales se encuentran en tallado punto a punto con tecnología FreeForm de alta definición para una visión nítida a toda distancia.',
+    statusDesc: 'Tallado digital, biselado y control de calidad en laboratorio.',
     showPickupBanner: false,
     history: [
-      { step: 1, name: 'Pedido recibido', date: '09 Mar - 04:00 PM', desc: 'Toma de medidas pupilares y registro de receta.' },
-      { step: 2, name: 'En proceso', date: '10 Mar - 08:30 AM', desc: 'Tallado de curvas progresivas en laboratorio.' },
-      { step: 3, name: 'Control de calidad', date: 'Estimado: 11 Mar', desc: 'Inspección de campos visuales y tratamientos.' },
-      { step: 4, name: 'Listo para recoger', date: 'Estimado: 12 Mar', desc: 'Listo en Galería San Antonio, Jr. Gamarra 778.' },
-      { step: 5, name: 'Entregado', date: 'Pendiente', desc: 'Acompañamiento en proceso de adaptación visual.' }
+      { step: 1, name: 'Cola', date: '09 Mar - 04:00 PM', desc: 'Receta registrada y montura asignada. En espera de laboratorio.' },
+      { step: 2, name: 'Proceso', date: '10 Mar - 08:30 AM', desc: 'Tallado digital, biselado y control de calidad en laboratorio.' },
+      { step: 3, name: 'Listo', date: 'Estimado: 12 Mar', desc: 'Tu pedido ya está en tienda listo para ser entregado.' }
     ]
   },
 
@@ -130,18 +125,16 @@ const ORDERS_DB = {
     service: 'Gafas de Sol Oakley Polarizadas con Graduación Espejada',
     branch: 'Galería San Antonio, Jr. Gamarra N° 778, Trujillo 13001',
     currentStep: 1,
-    statusTitle: 'Pedido Recibido en Óptica',
-    statusBadgeText: 'Pedido Recibido',
+    statusTitle: 'En Cola de Espera',
+    statusBadgeText: 'Cola',
     statusBadgeClass: 'state-badge-progress',
     statusBoxClass: 'status-box-progress',
-    statusDesc: 'Hemos recepcionado tu prescripción médica y la montura seleccionada. Se ha generado la orden de trabajo para ingresar al laboratorio óptico.',
+    statusDesc: 'Receta registrada y montura asignada. En espera de laboratorio.',
     showPickupBanner: false,
     history: [
-      { step: 1, name: 'Pedido recibido', date: '10 Mar - 09:45 AM', desc: 'Orden confirmada y materiales solicitados.' },
-      { step: 2, name: 'En proceso', date: 'Estimado: 11 Mar', desc: 'Tallado y polarizado de cristales solares.' },
-      { step: 3, name: 'Control de calidad', date: 'Estimado: 12 Mar', desc: 'Test de transmisión lumínica y protección UV.' },
-      { step: 4, name: 'Listo para recoger', date: 'Estimado: 13 Mar', desc: 'Aviso por WhatsApp para recojo.' },
-      { step: 5, name: 'Entregado', date: 'Pendiente', desc: 'Entrega con estuche original y garantía de fábrica.' }
+      { step: 1, name: 'Cola', date: '10 Mar - 09:45 AM', desc: 'Receta registrada y montura asignada. En espera de laboratorio.' },
+      { step: 2, name: 'Proceso', date: 'Estimado: 11 Mar', desc: 'Tallado digital, biselado y control de calidad en laboratorio.' },
+      { step: 3, name: 'Listo', date: 'Estimado: 13 Mar', desc: 'Tu pedido ya está en tienda listo para ser entregado.' }
     ]
   },
 
@@ -152,37 +145,58 @@ const ORDERS_DB = {
     estimatedDate: '07 de Marzo, 2026',
     service: 'Montura Ultraligera de Titanio + Cristales Monofocales Crizal',
     branch: 'Galería San Antonio, Jr. Gamarra N° 778, Trujillo 13001',
-    currentStep: 5,
-    statusTitle: 'Pedido Entregado con Éxito',
-    statusBadgeText: 'Entregado',
-    statusBadgeClass: 'state-badge-done',
-    statusBoxClass: 'status-box-done',
-    statusDesc: '¡Tu orden ha sido entregada con éxito en nuestra sede! Recuerda que cuentas con 1 año de garantía oficial y mantenimiento preventivo gratuito de por vida (ajuste de tornillos y limpieza ultrasónica).',
-    showPickupBanner: false,
+    currentStep: 3,
+    statusTitle: '¡Listo para Recoger en Tienda!',
+    statusBadgeText: 'Listo',
+    statusBadgeClass: 'state-badge-ready',
+    statusBoxClass: 'status-box-ready',
+    statusDesc: 'Tu pedido ya está en tienda listo para ser entregado.',
+    showPickupBanner: true,
     history: [
-      { step: 1, name: 'Pedido recibido', date: '04 Mar - 11:15 AM', desc: 'Orden registrada.' },
-      { step: 2, name: 'En proceso', date: '05 Mar - 02:30 PM', desc: 'Laboratorio y biselado.' },
-      { step: 3, name: 'Control de calidad', date: '06 Mar - 11:00 AM', desc: 'Inspección aprobada.' },
-      { step: 4, name: 'Listo para recoger', date: '07 Mar - 10:00 AM', desc: 'Notificado al cliente.' },
-      { step: 5, name: 'Entregado', date: '07 Mar - 06:40 PM', desc: 'Entregado con conformidad en tienda.' }
+      { step: 1, name: 'Cola', date: '04 Mar - 11:15 AM', desc: 'Receta registrada y montura asignada. En espera de laboratorio.' },
+      { step: 2, name: 'Proceso', date: '05 Mar - 02:30 PM', desc: 'Tallado digital, biselado y control de calidad en laboratorio.' },
+      { step: 3, name: 'Listo', date: '07 Mar - 10:00 AM', desc: 'Tu pedido ya está en tienda listo para ser entregado.' }
     ]
   }
 };
 
 function normalizeOrder(order) {
-  const baseStep = Number(order.currentStep) || 1;
-  const safeStep = Math.min(5, Math.max(1, baseStep));
+  const safeStep = mapStatusToStep(order.estado || order.currentStep);
   const currentStatus = ORDER_STATUS_DEFS[safeStep];
+
+  // Construir historial limpio de 3 pasos
+  const history = [
+    {
+      step: 1,
+      name: 'Cola',
+      date: order.history?.[0]?.date || order.receivedDate || 'Registrado',
+      desc: 'Receta registrada y montura asignada. En espera de laboratorio.'
+    },
+    {
+      step: 2,
+      name: 'Proceso',
+      date: order.history?.[1]?.date || (safeStep >= 2 ? 'En taller' : 'Estimado: ' + (order.estimatedDate || 'Pronto')),
+      desc: 'Tallado digital, biselado y control de calidad en laboratorio.'
+    },
+    {
+      step: 3,
+      name: 'Listo',
+      date: order.history?.[2]?.date || (safeStep >= 3 ? 'En tienda' : 'Estimado: ' + (order.estimatedDate || 'Por confirmar')),
+      desc: 'Tu pedido ya está en tienda listo para ser entregado.'
+    }
+  ];
 
   return {
     ...order,
+    estado: currentStatus.key,
     currentStep: safeStep,
     statusTitle: currentStatus.statusTitle,
     statusBadgeText: currentStatus.statusBadgeText,
     statusBadgeClass: currentStatus.statusBadgeClass,
     statusBoxClass: currentStatus.statusBoxClass,
     statusDesc: currentStatus.statusDesc,
-    showPickupBanner: currentStatus.showPickupBanner
+    showPickupBanner: currentStatus.showPickupBanner,
+    history
   };
 }
 
@@ -240,13 +254,11 @@ function ensureOrdersPersisted() {
   return orders;
 }
 
-// Íconos SVG para cada paso
+// Íconos SVG para cada uno de los 3 pasos (1: Cola, 2: Proceso, 3: Listo)
 const STEP_ICONS = {
   1: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
   2: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>`,
-  3: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>`,
-  4: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`,
-  5: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`
+  3: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>`
 };
 
 const CHECK_ICON = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
@@ -462,6 +474,7 @@ function createNewOrderRecord({ customer, service, phone, dni, notes }) {
     estimatedDate,
     service,
     branch: 'Galería San Antonio, Jr. Gamarra N° 778, Trujillo 13001',
+    estado: 'cola',
     currentStep: 1,
     statusTitle: firstStatus.statusTitle,
     statusBadgeText: firstStatus.statusBadgeText,
@@ -470,11 +483,9 @@ function createNewOrderRecord({ customer, service, phone, dni, notes }) {
     statusDesc: firstStatus.statusDesc,
     showPickupBanner: firstStatus.showPickupBanner,
     history: [
-      { step: 1, name: 'Pedido recibido', date: 'Hoy', desc: 'Registro creado por el optometrista y enlace generado para seguimiento.' },
-      { step: 2, name: 'En proceso', date: 'Pendiente', desc: 'El laboratorio está por iniciar la fabricación del pedido.' },
-      { step: 3, name: 'Control de calidad', date: 'Pendiente', desc: 'Se verificará la calidad y precisión óptica antes del cierre final.' },
-      { step: 4, name: 'Listo para recoger', date: 'Pendiente', desc: 'Se notificará al cliente cuando esté listo para recojo.' },
-      { step: 5, name: 'Entregado', date: 'Pendiente', desc: 'Entrega final en tienda con garantía oficial.' }
+      { step: 1, name: 'Cola', date: 'Hoy', desc: 'Receta registrada y montura asignada. En espera de laboratorio.' },
+      { step: 2, name: 'Proceso', date: 'Pendiente', desc: 'Tallado digital, biselado y control de calidad en laboratorio.' },
+      { step: 3, name: 'Listo', date: 'Pendiente', desc: 'Tu pedido ya está en tienda listo para ser entregado.' }
     ]
   };
 }
@@ -646,12 +657,13 @@ function updateOrderStep(code, delta) {
   const order = orders[code];
   if (!order) return;
 
-  const nextStep = Math.min(5, Math.max(1, Number(order.currentStep) + delta));
+  const nextStep = Math.min(3, Math.max(1, Number(order.currentStep) + delta));
   const nextStatus = ORDER_STATUS_DEFS[nextStep];
 
   orders[code] = {
     ...order,
     currentStep: nextStep,
+    estado: nextStatus.key,
     ...nextStatus
   };
 
@@ -715,8 +727,8 @@ function renderOrderResult(order) {
   const waMsg = `Hola Lens Group Trujillo, tengo una consulta sobre mi pedido *${order.code}* a nombre de *${order.customer}* (${order.service}).`;
   const waUrl = `https://wa.me/${WHATSAPP_STORE_PHONE}?text=${encodeURIComponent(waMsg)}`;
 
-  // Porcentaje para la barra de progreso (1 a 5 pasos -> 0%, 25%, 50%, 75%, 100%)
-  const progressPercent = ((order.currentStep - 1) / 4) * 100;
+  // Porcentaje para la barra de progreso (1 a 3 pasos -> 0%, 50%, 100%)
+  const progressPercent = ((order.currentStep - 1) / 2) * 100;
 
   // Determinar si en móvil debe ser altura en vez de ancho
   const isMobile = window.innerWidth <= 768;
@@ -798,7 +810,7 @@ function renderOrderResult(order) {
         </div>
       </div>
 
-      <!-- Línea de Tiempo de 5 Estados -->
+      <!-- Línea de Tiempo de 3 Estados (Cola -> Proceso -> Listo) -->
       <div class="tracking-timeline-section">
         <div class="timeline-header-row">
           <div>

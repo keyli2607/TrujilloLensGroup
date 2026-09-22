@@ -20,21 +20,9 @@ const STEP_ICONS = {
   ),
   3: (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-      <path d="m9 12 2 2 4-4"></path>
-    </svg>
-  ),
-  4: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
       <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
       <line x1="3" y1="6" x2="21" y2="6"></line>
       <path d="M16 10a4 4 0 0 1-8 0"></path>
-    </svg>
-  ),
-  5: (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-      <polyline points="22 4 12 14.01 9 11.01"></polyline>
     </svg>
   ),
 };
@@ -46,11 +34,9 @@ const CHECK_ICON = (
 );
 
 const SAMPLE_CHIPS = [
-  { code: "LGT-2025-0342", tag: "Listo para recoger" },
-  { code: "LGT-2025-0210", tag: "Control de calidad" },
-  { code: "LGT-2025-0105", tag: "En proceso" },
-  { code: "LGT-2025-0450", tag: "Pedido recibido" },
-  { code: "LGT-2025-0500", tag: "Entregado" },
+  { code: "LGT-2025-0450", tag: "Cola" },
+  { code: "LGT-2025-0105", tag: "Proceso" },
+  { code: "LGT-2025-0342", tag: "Listo" },
 ];
 
 export default function TrackingSection() {
@@ -109,7 +95,7 @@ export default function TrackingSection() {
     setNotFound(false);
   };
 
-  const progressPercent = orderResult ? ((orderResult.currentStep - 1) / 4) * 100 : 0;
+  const progressPercent = orderResult ? ((orderResult.currentStep - 1) / 2) * 100 : 0;
 
   return (
     <section className="section section-bg-alt" id="seguimiento">

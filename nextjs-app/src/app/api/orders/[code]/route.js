@@ -1,19 +1,53 @@
 import { NextResponse } from "next/server";
 
-const STATUS_STEPS = {
-  "En Cola": 1,
-  "En Proceso": 2,
-  "Listo para Recojo": 4,
-  Entregado: 5,
-  Cancelado: 5,
+const ORDER_STATUS_DEFS = {
+  1: {
+    key: "cola",
+    statusTitle: "En Cola de Espera",
+    statusBadgeText: "Cola",
+    statusBadgeClass: "state-badge-progress",
+    statusBoxClass: "status-box-progress",
+    statusDesc: "Receta registrada y montura asignada. En espera de laboratorio.",
+    showPickupBanner: false,
+  },
+  2: {
+    key: "proceso",
+    statusTitle: "En Proceso de Laboratorio",
+    statusBadgeText: "Proceso",
+    statusBadgeClass: "state-badge-progress",
+    statusBoxClass: "status-box-progress",
+    statusDesc: "Tallado digital, biselado y control de calidad en laboratorio.",
+    showPickupBanner: false,
+  },
+  3: {
+    key: "listo",
+    statusTitle: "¡Listo para Recoger en Tienda!",
+    statusBadgeText: "Listo",
+    statusBadgeClass: "state-badge-ready",
+    statusBoxClass: "status-box-ready",
+    statusDesc: "Tu pedido ya está en tienda listo para ser entregado.",
+    showPickupBanner: true,
+  },
 };
 
+function mapStatusToStep(val) {
+  if (typeof val === "number") {
+    if (val <= 1) return 1;
+    if (val === 2 || val === 3) return 2;
+    return 3;
+  }
+  if (!val) return 1;
+  const s = String(val).toLowerCase().trim();
+  if (s.includes("cola")) return 1;
+  if (s.includes("proceso") || s.includes("taller") || s.includes("calidad") || s.includes("laboratorio")) return 2;
+  if (s.includes("listo") || s.includes("recojo") || s.includes("entrega")) return 3;
+  return 1;
+}
+
 const STATUS_NAMES = {
-  1: "Pedido recibido",
-  2: "En proceso",
-  3: "Control de calidad",
-  4: "Listo para recoger",
-  5: "Entregado",
+  1: "Cola",
+  2: "Proceso",
+  3: "Listo",
 };
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -30,23 +64,22 @@ function formatDate(value, fallback = "Pendiente") {
 
 function buildHistory(order, currentStep) {
   const events = [
-    { step: 1, date: order.creado_en, desc: "Orden registrada en el sistema." },
-    { step: 2, date: order.iniciado_en, desc: "El laboratorio inició el trabajo de la orden." },
-    { step: 3, date: order.completado_en, desc: "La orden pasó por control de calidad." },
-    { step: 4, date: order.completado_en, desc: "Disponible para recojo en tienda." },
-    { step: 5, date: null, desc: "Entrega final registrada en tienda." },
+    { step: 1, date: order.creado_en, desc: "Receta registrada y montura asignada. En espera de laboratorio." },
+    { step: 2, date: order.iniciado_en, desc: "Tallado digital, biselado y control de calidad en laboratorio." },
+    { step: 3, date: order.completado_en, desc: "Tu pedido ya está en tienda listo para ser entregado." },
   ];
 
   return events.map((event) => ({
     step: event.step,
     name: STATUS_NAMES[event.step],
-    date: event.date ? formatDate(event.date) : event.step > currentStep ? "Pendiente" : "Pendiente de actualización",
+    date: event.date ? formatDate(event.date) : event.step > currentStep ? "Pendiente" : "Completado",
     desc: event.desc,
   }));
 }
 
 function mapOrder(order) {
-  const currentStep = STATUS_STEPS[order.estado] || 1;
+  const currentStep = mapStatusToStep(order.estado);
+  const statusDef = ORDER_STATUS_DEFS[currentStep];
   const sale = order.ventas || {};
   const patient = sale.pacientes || {};
   const branch = sale.sucursales || {};
@@ -57,8 +90,15 @@ function mapOrder(order) {
     receivedDate: formatDate(order.creado_en),
     estimatedDate: formatDate(sale.fecha_entrega, "Por confirmar"),
     service: [sale.montura_descripcion, sale.luna_descripcion].filter(Boolean).join(" + ") || "Servicio óptico registrado",
-    branch: branch.direccion || "Sede de entrega por confirmar",
+    branch: branch.direccion || "Galería San Antonio, Jr. Gamarra N° 778, Trujillo 13001",
     currentStep,
+    estado: statusDef.key,
+    statusTitle: statusDef.statusTitle,
+    statusBadgeText: statusDef.statusBadgeText,
+    statusBadgeClass: statusDef.statusBadgeClass,
+    statusBoxClass: statusDef.statusBoxClass,
+    statusDesc: statusDef.statusDesc,
+    showPickupBanner: statusDef.showPickupBanner,
     history: buildHistory(order, currentStep),
   };
 }

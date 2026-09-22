@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const states = ["En Cola", "En Proceso", "Listo para Recojo", "Entregado", "Cancelado"];
+const states = ["cola", "proceso", "listo"];
 
 export default function AdminDashboard() {
   const [credentials, setCredentials] = useState({ dni: "", pin: "" });
