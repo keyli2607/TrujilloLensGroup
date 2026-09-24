@@ -196,9 +196,6 @@ export default function CatalogSection() {
                   </div>
 
                   <div className="product-body">
-                    <span className="product-brand">
-                      {prod.categoria || "Montura"} {prod.material ? `• ${prod.material}` : ""}
-                    </span>
                     <h3 className="product-title">{prod.nombre_autogenerado || prod.modelo}</h3>
 
                     <div className="product-specs">

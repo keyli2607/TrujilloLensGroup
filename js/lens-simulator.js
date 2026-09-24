@@ -19,7 +19,7 @@ const TREATMENTS_DATA = {
     title: 'Lunas Polarizadas Pro UV400',
     filterClass: 'filter-polarized',
     description: 'Filtra las ondas de luz horizontales que rebotan sobre el asfalto mojado, el mar o superficies metálicas. Reduce el encandilamiento y mejora la saturación del color.',
-    idealFor: 'Conducción en carretera, días soleados en Huanchaco, actividades al aire libre y deportes.'
+    idealFor: 'Conducción en carretera, días soleados en la playa, actividades al aire libre y deportes.'
   },
   transitions: {
     title: 'Fotocromático Inteligente (Transitions Gen 8)',

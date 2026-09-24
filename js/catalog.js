@@ -207,7 +207,6 @@ function renderProducts(productList) {
         </div>
       </div>
       <div class="product-body">
-        <span class="product-brand">${prod.brand} • ${prod.categoryLabel}</span>
         <h3 class="product-title">${prod.name}</h3>
         <div class="product-specs">
           ${prod.specs.map(s => `<span class="spec-chip">${s}</span>`).join('')}

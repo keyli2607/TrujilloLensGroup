@@ -52,10 +52,7 @@ export default function ProductModal({ product, isOpen, onClose }) {
           <div className="modal-viewer-wrapper">
             <div className="modal-main-info">
               {/* Etiquetas y badges */}
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: "0.4rem", marginBottom: "0.4rem" }}>
-                <span className="product-brand" id="modalBrand" style={{ fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700, color: "var(--color-teal-700)" }}>
-                  {product.marca || product.brand || "Lens Group Trujillo"} • {product.categoria || product.categoryLabel || "Monturas"}
-                </span>
+              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "flex-end", gap: "0.4rem", marginBottom: "0.4rem" }}>
 
                 <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
                   {product.stock_total !== undefined && (

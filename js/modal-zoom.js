@@ -22,7 +22,7 @@ function openProductModal(productId) {
   // Cargar contenido de imagen y texto
   imgEl.src = activeProduct.image;
   imgEl.alt = activeProduct.name;
-  brandEl.textContent = `${activeProduct.brand} • ${activeProduct.categoryLabel}`;
+  if (brandEl) brandEl.textContent = `${activeProduct.brand} • ${activeProduct.categoryLabel}`;
   titleEl.textContent = activeProduct.name;
   descEl.textContent = activeProduct.description;
   priceEl.textContent = `S/ ${activeProduct.price}`;
