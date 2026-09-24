@@ -445,12 +445,12 @@ body {
 }
 
 .catalog-promo-banner {
+  display: none !important;
   margin-top: 5rem !important;
   background: linear-gradient(180deg, rgba(17, 42, 64, 0.97) 0%, rgba(14, 34, 52, 0.97) 100%);
   color: #ffffff;
   padding: 2rem 1.5rem 1.5rem;
   border-radius: 1.75rem;
-  display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
@@ -1004,7 +1004,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   CATALOG PRODUCTS GRID (estático, sin carrusel)
+   CATALOG PRODUCTS — Carrusel táctil en celulares (<= 768px), cuadrícula en escritorio
    -------------------------------------------------------------------------- */
 .products-grid {
   display: grid;
@@ -1012,15 +1012,40 @@ body {
   gap: 1.5rem;
 }
 
-@media (max-width: 639px) {
+@media (max-width: 768px) {
   .products-grid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth;
+    gap: 1rem !important;
+    padding: 0.5rem 1.25rem 1.5rem 1.25rem !important;
+    margin-left: -1rem !important;
+    margin-right: -1rem !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .products-grid::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .products-grid .product-card {
+    flex: 0 0 80vw !important;
+    min-width: 260px !important;
+    max-width: 320px !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: normal;
   }
 }
 
-@media (min-width: 640px) {
+@media (min-width: 769px) {
   .products-grid {
+    display: grid !important;
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -1038,15 +1063,15 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   CATALOG PROMO BANNER
+   CATALOG PROMO BANNER (Solo visible en celular / móvil)
    -------------------------------------------------------------------------- */
 .catalog-promo-banner {
+  display: none !important;
   margin-top: 3.5rem;
   background: linear-gradient(135deg, var(--color-primary-900) 0%, var(--color-primary-800) 100%);
   color: white;
   padding: 2.5rem;
   border-radius: var(--radius-xl);
-  display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
@@ -1057,6 +1082,7 @@ body {
 
 @media (max-width: 768px) {
   .catalog-promo-banner {
+    display: flex !important;
     padding: 1.5rem 1.25rem;
     flex-direction: column;
     text-align: center;

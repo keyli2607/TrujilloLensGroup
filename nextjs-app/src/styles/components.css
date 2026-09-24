@@ -754,7 +754,7 @@ body {
 }
 
 /* --------------------------------------------------------------------------
-   CATALOG PRODUCTS GRID (estático, sin carrusel)
+   CATALOG PRODUCTS — Carrusel táctil en celulares (<= 768px), cuadrícula en escritorio
    -------------------------------------------------------------------------- */
 .products-grid {
   display: grid;
@@ -762,15 +762,40 @@ body {
   gap: 1.5rem;
 }
 
-@media (max-width: 639px) {
+@media (max-width: 768px) {
   .products-grid {
-    grid-template-columns: 1fr;
-    gap: 1.25rem;
+    display: flex !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory !important;
+    -webkit-overflow-scrolling: touch !important;
+    scroll-behavior: smooth;
+    gap: 1rem !important;
+    padding: 0.5rem 1.25rem 1.5rem 1.25rem !important;
+    margin-left: -1rem !important;
+    margin-right: -1rem !important;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .products-grid::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .products-grid .product-card {
+    flex: 0 0 80vw !important;
+    min-width: 260px !important;
+    max-width: 320px !important;
+    scroll-snap-align: start !important;
+    scroll-snap-stop: normal;
   }
 }
 
-@media (min-width: 640px) {
+@media (min-width: 769px) {
   .products-grid {
+    display: grid !important;
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -876,24 +901,10 @@ body {
   }
 }
 
-/* En pantallas más grandes (Desktop) vuelve a ponerse horizontal */
+/* Oculto en pantallas grandes (Desktop) - solo visible en celular */
 @media (min-width: 769px) {
   .catalog-promo-banner {
-    flex-direction: row !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    gap: 2rem;
-    padding: 2.5rem !important;
-  }
-
-  .catalog-promo-copy {
-    flex: 1 1 320px;
-    margin-bottom: 0 !important;
-  }
-
-  .catalog-promo-button {
-    width: min(100%, 550px) !important;
-    min-width: 300px;
+    display: none !important;
   }
 }
 
