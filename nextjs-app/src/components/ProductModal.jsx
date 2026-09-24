@@ -51,23 +51,6 @@ export default function ProductModal({ product, isOpen, onClose }) {
           {/* Columna Izquierda: Información Principal + Imagen del Producto */}
           <div className="modal-viewer-wrapper">
             <div className="modal-main-info">
-              {/* Etiquetas y badges */}
-              <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "flex-end", gap: "0.4rem", marginBottom: "0.4rem" }}>
-
-                <div style={{ display: "flex", gap: "0.35rem", flexWrap: "wrap" }}>
-                  {product.stock_total !== undefined && (
-                    <span className="product-tag-badge" style={{ background: "#0d9488", color: "#fff", padding: "0.2rem 0.5rem", fontSize: "0.75rem" }}>
-                      Stock: {product.stock_total}
-                    </span>
-                  )}
-                  {product.tag && (
-                    <span className="product-tag-badge" id="modalTag" style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem" }}>
-                      {product.tag}
-                    </span>
-                  )}
-                </div>
-              </div>
-
               {/* Título / Nombre del Producto */}
               <h2 id="modalTitle" style={{ fontSize: "1.45rem", lineHeight: 1.25, margin: "0.2rem 0 0.5rem 0", color: "var(--color-dark-900)" }}>
                 {product.nombre_autogenerado || product.name || product.modelo}
@@ -93,6 +76,16 @@ export default function ProductModal({ product, isOpen, onClose }) {
             </div>
 
             <div className="modal-zoom-container" id="modalZoomContainer">
+              {product.stock_total !== undefined && (
+                <span className="product-tag-badge" style={{ background: "#0d9488", color: "#fff", padding: "0.2rem 0.5rem", fontSize: "0.75rem", top: "1rem", left: "1rem" }}>
+                  Stock: {product.stock_total}
+                </span>
+              )}
+              {product.tag && (
+                <span className="product-tag-badge" id="modalTag" style={{ padding: "0.2rem 0.5rem", fontSize: "0.75rem", top: product.stock_total !== undefined ? "2.6rem" : "1rem", left: "1rem" }}>
+                  {product.tag}
+                </span>
+              )}
               <img
                 src={product.imagen || product.image || "/images/optics_acetate.jpg"}
                 alt={product.nombre_autogenerado || product.name || product.modelo || "Lente"}

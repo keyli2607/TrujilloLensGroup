@@ -1227,10 +1227,7 @@
         <!-- Columna Izquierda: Información Principal + Imagen del Producto -->
         <div class="modal-viewer-wrapper">
           <div class="modal-main-info">
-            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; margin-bottom: 0.35rem;">
-              <span class="product-tag-badge" id="modalTag" style="display: inline-block; width: fit-content; margin: 0;"></span>
-            </div>
-            <h2 id="modalTitle" style="font-size: 1.5rem; line-height: 1.25; margin: 0.2rem 0 0.5rem 0; color: var(--color-dark-900);"></h2>
+            <h2 id="modalTitle" style="font-size: 1.5rem; line-height: 1.25; margin: 0 0 0.5rem 0; color: var(--color-dark-900);"></h2>
 
             <div style="margin-bottom: 0.65rem; display: flex; align-items: baseline; gap: 0.6rem;">
               <span class="product-price" id="modalPrice" style="font-size: 1.85rem; font-weight: 800; color: var(--color-teal-700);"></span>
@@ -1241,6 +1238,7 @@
           </div>
 
           <div class="modal-zoom-container" id="modalZoomContainer">
+            <span class="product-tag-badge" id="modalTag"></span>
             <img src="" alt="" class="modal-zoom-image" id="modalZoomImage">
           </div>
         </div>

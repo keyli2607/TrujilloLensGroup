@@ -34,7 +34,15 @@ function openProductModal(productId) {
     oldPriceEl.style.display = 'none';
   }
 
-  tagEl.textContent = activeProduct.tag;
+  if (tagEl) {
+    if (activeProduct.tag) {
+      tagEl.textContent = activeProduct.tag;
+      tagEl.style.display = 'inline-block';
+    } else {
+      tagEl.textContent = '';
+      tagEl.style.display = 'none';
+    }
+  }
 
   // Renderizar especificaciones técnicas
   const details = activeProduct.details;
