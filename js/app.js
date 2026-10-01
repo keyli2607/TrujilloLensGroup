@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSmoothScroll();
   initMobileActionBar();
   updateStoreStatus();
+  initCatalogoNinos();
 });
 
 // 1. Sticky Header Effect
@@ -176,5 +177,71 @@ function updateStoreStatus() {
     badge.style.background  = '#fef2f2';
     badge.style.color       = '#b91c1c';
     badge.style.borderColor = '#fecaca';
+  }
+}
+
+// 6. Catálogo de Niños — Filtros por categoría y búsqueda aislada
+function initCatalogoNinos() {
+  const sectionNinos = document.getElementById('catalogo-ninos');
+  const searchInput = document.getElementById('search-ninos');
+  const filtrosContainer = document.getElementById('filtros-ninos');
+  const gridContainer = document.getElementById('grid-ninos');
+  const emptyState = document.getElementById('empty-state-ninos');
+
+  if (!sectionNinos || !filtrosContainer || !gridContainer) return;
+
+  const filterBtns = filtrosContainer.querySelectorAll('button');
+  const productCards = gridContainer.querySelectorAll('.product-card-ninos');
+
+  let currentCategory = 'todos';
+  let searchQuery = '';
+
+  function applyKidsFilters() {
+    let visibleCount = 0;
+
+    productCards.forEach(card => {
+      const cardCategory = (card.getAttribute('data-category') || '').toLowerCase().trim();
+      const cardTitle = card.querySelector('.product-title')?.textContent.toLowerCase() || '';
+      const cardSpecs = Array.from(card.querySelectorAll('.spec-chip'))
+        .map(chip => chip.textContent.toLowerCase())
+        .join(' ');
+      const cardNameAttr = (card.getAttribute('data-name') || '').toLowerCase();
+
+      const fullText = `${cardTitle} ${cardSpecs} ${cardNameAttr} ${cardCategory}`;
+
+      const matchesCategory = (currentCategory === 'todos') || (cardCategory === currentCategory);
+      const matchesSearch = !searchQuery || fullText.includes(searchQuery);
+
+      if (matchesCategory && matchesSearch) {
+        card.style.display = '';
+        visibleCount++;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    if (emptyState) {
+      emptyState.style.display = (visibleCount === 0) ? 'block' : 'none';
+    }
+  }
+
+  // Event listeners para botones de categorías infantiles
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      currentCategory = (btn.getAttribute('data-category') || 'todos').toLowerCase().trim();
+      applyKidsFilters();
+    });
+  });
+
+  // Event listener para búsqueda en tiempo real de productos infantiles
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      applyKidsFilters();
+    });
   }
 }

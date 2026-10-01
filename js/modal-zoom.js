@@ -5,7 +5,8 @@
 let activeProduct = null;
 
 function openProductModal(productId) {
-  activeProduct = PRODUCTS.find(p => p.id === productId);
+  activeProduct = (typeof PRODUCTS !== 'undefined' ? PRODUCTS.find(p => p.id === productId) : null)
+    || (window.KIDS_PRODUCTS ? window.KIDS_PRODUCTS.find(p => p.id === productId) : null);
   if (!activeProduct) return;
 
   const modal = document.getElementById('productModal');

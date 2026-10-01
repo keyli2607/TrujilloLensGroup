@@ -3363,3 +3363,74 @@ body {
     display: none !important;
   }
 }
+
+/* ==========================================================================
+   SECCIÓN CATÁLOGO DE NIÑOS — TEMÁTICA LÚDICA & AMIGABLE
+   ========================================================================== */
+#catalogo-ninos {
+  background: linear-gradient(180deg, #f0fdfa 0%, #f0f9ff 60%, #ffffff 100%) !important;
+  padding: 5rem 0 !important; /* py-20 */
+  border-top: 1px solid rgba(13, 148, 136, 0.12);
+  border-bottom: 1px solid rgba(13, 148, 136, 0.08);
+  position: relative;
+}
+
+#catalogo-ninos .section-tag {
+  background: #ccfbf1 !important; /* bg-teal-100 */
+  color: #115e59 !important; /* text-teal-800 */
+  border: 1px solid rgba(13, 148, 136, 0.25) !important;
+  border-radius: 9999px !important; /* rounded-full */
+  padding: 0.45rem 1.25rem !important;
+  font-weight: 800 !important;
+  font-size: 0.8rem !important;
+  letter-spacing: 0.08em !important;
+  box-shadow: 0 2px 8px rgba(13, 148, 136, 0.12) !important;
+  display: inline-block;
+}
+
+#catalogo-ninos .section-title {
+  font-size: clamp(2rem, 4vw, 2.6rem) !important; /* text-4xl */
+  font-weight: 900 !important; /* font-extrabold */
+  letter-spacing: -0.03em !important;
+  line-height: 1.2 !important;
+  margin-top: 0.75rem !important;
+  margin-bottom: 0.75rem !important;
+}
+
+#catalogo-ninos .kids-title-gradient {
+  background: linear-gradient(135deg, #0d9488 0%, #0284c7 50%, #2563eb 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  display: inline-block;
+}
+
+#catalogo-ninos .catalog-controls {
+  border-radius: 2rem !important; /* rounded-3xl / rounded-full */
+  box-shadow: 0 10px 30px -5px rgba(13, 148, 136, 0.14), 0 4px 16px rgba(0, 0, 0, 0.04) !important; /* shadow-lg shadow-teal-100/50 */
+  border: 1px solid rgba(13, 148, 136, 0.18) !important;
+  background: #ffffff !important;
+  padding: 0.85rem 1.5rem !important;
+}
+
+#catalogo-ninos #grid-ninos {
+  gap: 2rem !important; /* gap-8 */
+}
+
+#catalogo-ninos .product-card-ninos {
+  border-radius: 1.5rem !important; /* rounded-3xl */
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.06), 0 2px 8px -1px rgba(13, 148, 136, 0.08) !important; /* shadow-md */
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, border-color 0.3s ease !important; /* transition-shadow duration-300 */
+}
+
+#catalogo-ninos .product-card-ninos:hover {
+  transform: translateY(-6px) !important;
+  box-shadow: 0 20px 35px -5px rgba(13, 148, 136, 0.18), 0 8px 16px -2px rgba(15, 23, 42, 0.08) !important; /* hover:shadow-xl */
+  border-color: rgba(13, 148, 136, 0.35) !important;
+}
+
+#catalogo-ninos .product-card-ninos .product-media {
+  border-top-left-radius: 1.5rem !important;
+  border-top-right-radius: 1.5rem !important;
+}

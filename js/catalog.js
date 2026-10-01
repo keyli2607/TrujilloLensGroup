@@ -47,8 +47,8 @@ const PRODUCTS = [
     id: 'prod-3',
     name: 'Montura Studio Blue Defense',
     brand: 'Inka Lens',
-    category: 'receta',
-    categoryLabel: 'Lentes con Receta',
+    category: 'monturas',
+    categoryLabel: 'Monturas',
     price: 360,
     oldPrice: 420,
     tag: 'Salud Visual',
@@ -125,22 +125,22 @@ const PRODUCTS = [
   },
   {
     id: 'prod-7',
-    name: 'Acuvue Oasys HydraLuxe (Caja 6 Lentes)',
-    brand: 'Johnson & Johnson',
-    category: 'contacto',
-    categoryLabel: 'Lentes de Contacto',
-    price: 185,
-    oldPrice: 210,
-    tag: 'Alta Hidratación',
-    image: 'assets/images/contact_lenses.jpg',
-    specs: ['Reemplazo Quincenal', 'Tecnología HydraLuxe', 'Filtro UV Clase 1'],
-    description: 'Lentes de contacto de hidrogel de silicona diseñados para ojos exigentes y jornadas largas. Mantienen la lágrima natural y evitan la sensación de sequedad o irritación.',
+    name: 'Kit de Limpieza Profesional',
+    brand: 'Lens Care',
+    category: 'accesorios',
+    categoryLabel: 'Accesorios',
+    price: 45,
+    oldPrice: 65,
+    tag: 'Más Vendido',
+    image: 'assets/images/accesorio-1.jpg',
+    specs: ['Spray Limpiador 60ml', 'Paño Microfibra Premium', 'Tela Limpiadora Antiestática'],
+    description: 'Kit completo para el cuidado y mantenimiento diario de tus lentes. Incluye spray limpiador biodegradable de alta eficacia y paño de microfibra ultrafina que no raya las lunas.',
     details: {
-      material: 'Senofilcon A (38% de contenido de agua)',
-      lenses: 'Superficie de ultra suavidad con lubricante natural integrado',
-      protection: 'Bloquea >90% UVA y >99% UVB',
-      measurements: 'Curva base: 8.4mm / 8.8mm | Diámetro: 14.0mm',
-      included: 'Pack sellado de 6 unidades + solución multipropósito de cortesía.'
+      material: 'Paño de microfibra 320 GSM libre de pelusas',
+      lenses: 'Compatible con lentes antireflex, polarizadas, fotocromáticas y con recubrimientos especiales',
+      protection: 'Fórmula neutra sin alcohol — apta para todos los tratamientos',
+      measurements: 'Spray: 60ml | Paño: 20×20cm',
+      included: 'Spray limpiador, paño de microfibra premium y tela limpiadora de algodón.'
     }
   },
   {
@@ -148,7 +148,7 @@ const PRODUCTS = [
     name: 'Kevin Aviador Titanium Modern',
     brand: 'Kevin',
     category: 'monturas',
-    categoryLabel: 'Monturas de Diseñador',
+    categoryLabel: 'Monturas',
     price: 430,
     oldPrice: 490,
     tag: 'Novedad',
@@ -161,6 +161,26 @@ const PRODUCTS = [
       protection: 'Resistencia a deformaciones térmicas',
       measurements: 'Calibre: 55mm | Puente: 16mm | Patilla: 145mm',
       included: 'Estuche rígido Kevin Collection, paño de microfibra y garantía.'
+    }
+  },
+  {
+    id: 'prod-9',
+    name: 'Estuche Rígido Premium',
+    brand: 'Lens Group',
+    category: 'accesorios',
+    categoryLabel: 'Accesorios',
+    price: 35,
+    oldPrice: 50,
+    tag: 'Alta Protección',
+    image: 'assets/images/accesorio-2.jpg',
+    specs: ['Carcasa ABS Resistente', 'Interior Felpa Suave', 'Cierre Magnético'],
+    description: 'Estuche rígido de alta resistencia con interior acolchado en felpa suave que protege tus lentes contra golpes, polvo y humedad. Diseño compacto con cierre magnético seguro.',
+    details: {
+      material: 'Exterior ABS de alto impacto | Interior felpa suave aterciopelada',
+      lenses: 'Protege monturas de hasta 58mm de calibre',
+      protection: 'Resistente a golpes, agua y polvo',
+      measurements: 'Largo: 16cm | Ancho: 7cm | Alto: 5cm',
+      included: 'Estuche rígido premium y paño limpiador de microfibra.'
     }
   }
 ];
@@ -239,18 +259,18 @@ function renderProducts(productList) {
 // ----------------------------------------------------------
 // Filtros y búsqueda
 // ----------------------------------------------------------
-let currentFilter = 'todos';
+let currentFilter = 'todos'; // valid values: 'todos' | 'monturas' | 'sol' | 'accesorios'
 let searchQuery = '';
 
 function setupCatalogFilters() {
-  const filterBtns = document.querySelectorAll('.filter-btn');
+  const filterBtns = document.querySelectorAll('#catalogo .filter-btn');
   const searchInput = document.getElementById('catalogSearch');
 
   filterBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const filter = btn.getAttribute('data-filter');
-      // Marca active en TODOS los botones con ese data-filter (por si están duplicados)
-      document.querySelectorAll('.filter-btn').forEach(b => {
+      // Marca active en TODOS los botones con ese data-filter (del catálogo principal)
+      document.querySelectorAll('#catalogo .filter-btn').forEach(b => {
         b.classList.toggle('active', b.getAttribute('data-filter') === filter);
       });
       currentFilter = filter;
@@ -292,3 +312,89 @@ document.addEventListener('DOMContentLoaded', () => {
   renderProducts(PRODUCTS);
   setupCatalogFilters();
 });
+
+// ----------------------------------------------------------
+// Catálogo de Niños — Datos para visor modal y cotización
+// ----------------------------------------------------------
+window.KIDS_PRODUCTS = [
+  {
+    id: 'kids-receta-1',
+    name: 'Darleen Kids Flex Ultra',
+    brand: 'Darleen Kids',
+    category: 'monturas',
+    categoryLabel: 'Monturas para Niños',
+    price: 180,
+    oldPrice: 220,
+    tag: 'Silicona Flexible',
+    image: 'assets/images/kids-receta-1.jpg',
+    specs: ['Silicona Flexible 180°', 'Filtro Luz Azul Digital', 'Banda Sujetadora'],
+    description: 'Montura de silicona irrompible hipoalergénica con bisagras de 180° de alta flexibilidad y banda elástica de sujeción para niños activos.',
+    details: {
+      material: 'Silicona médica hipoalergénica y flexible',
+      lenses: 'Lunas Blue Protect con filtro UV400 y antirreflejo',
+      protection: '100% UV400 + Filtro Luz Azul Digital',
+      measurements: 'Calibre: 46mm | Puente: 15mm | Patilla: 125mm',
+      included: 'Estuche rígido infantil, banda elástica y paño de microfibra.'
+    }
+  },
+  {
+    id: 'kids-receta-2',
+    name: 'Tony Lu Kids Active Blue Block',
+    brand: 'Tony Lu Kids',
+    category: 'monturas',
+    categoryLabel: 'Monturas para Niños',
+    price: 195,
+    oldPrice: 240,
+    tag: 'Salud Visual Kids',
+    image: 'assets/images/kids-receta-2.jpg',
+    specs: ['TR-90 Ultraliviano', 'Filtro Pantallas', 'Puente Anatómico'],
+    description: 'Montura ligera con estilo metálico pulido y polímero resistente para clases virtuales, uso de pantallas y protección diaria.',
+    details: {
+      material: 'TR-90 y aleación ultraligera con memoria anatómica',
+      lenses: 'Lunas policarbonato con protección digital Blue Block',
+      protection: '100% UV400 + 40% Luz Azul nociva',
+      measurements: 'Calibre: 48mm | Puente: 16mm | Patilla: 130mm',
+      included: 'Estuche oficial Tony Lu Kids y paño especial.'
+    }
+  },
+  {
+    id: 'kids-sol-1',
+    name: 'DEBBY Kids Polarized Sun Junior',
+    brand: 'DEBBY Kids',
+    category: 'sol',
+    categoryLabel: 'Gafas de Sol para Niños',
+    price: 160,
+    oldPrice: 195,
+    tag: 'Protección UV400',
+    image: 'assets/images/kids-sol-1.jpg',
+    specs: ['Filtro UV400 100%', 'Lunas Polarizadas', 'Marco Antigolpes'],
+    description: 'Gafas de sol para niños con lunas polarizadas de alta fidelidad que eliminan el brillo molesto y cuidan la retina infantil.',
+    details: {
+      material: 'Polímero engomado antigolpes',
+      lenses: 'Polarizadas TAC con protección UV total',
+      protection: '100% Protección UV400 Categoría 3',
+      measurements: 'Calibre: 47mm | Puente: 16mm | Patilla: 128mm',
+      included: 'Funda protectora DEBBY Kids y paño limpiador.'
+    }
+  },
+  {
+    id: 'kids-sol-2',
+    name: 'DEBBY Kids Explorer Sport Solar',
+    brand: 'DEBBY Kids',
+    category: 'sol',
+    categoryLabel: 'Gafas de Sol para Niños',
+    price: 170,
+    oldPrice: 210,
+    tag: 'Resistente a Caídas',
+    image: 'assets/images/kids-sol-2.jpg',
+    specs: ['Goma Antideslizante', 'Lunas Antirayaduras', 'Protección UV Total'],
+    description: 'Lentes solares deportivos infantiles diseñados para resistir caídas y brindar confort durante el juego y deportes.',
+    details: {
+      material: 'Acetato flexible con inserciones de goma antideslizante',
+      lenses: 'Policarbonato solar resistente a impactos',
+      protection: '100% UV400 categoría 3 deportiva',
+      measurements: 'Calibre: 49mm | Puente: 15mm | Patilla: 130mm',
+      included: 'Estuche protector deportivo y paño de microfibra.'
+    }
+  }
+];
