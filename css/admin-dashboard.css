@@ -1837,3 +1837,268 @@ body.dark-mode {
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
   border-color: rgba(56, 189, 248, 0.4) !important;
 }
+
+/* ==========================================================================
+   MÓDULO DE VENTAS, FACTURACIÓN ELECTRÓNICA & CONSULTAS RENIEC / SUNAT
+   ========================================================================== */
+.fiscal-type-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  background: var(--sim-sunken);
+  padding: 0.35rem;
+  border-radius: 8px;
+  border: 1px solid var(--admin-card-border);
+}
+
+.fiscal-type-btn {
+  background: transparent;
+  border: none;
+  color: var(--admin-text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.fiscal-type-btn.active {
+  background: var(--admin-primary);
+  color: #0b1329;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
+}
+
+.fiscal-input-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.fiscal-input-group .form-input {
+  flex: 1;
+}
+
+.btn-fiscal-lookup {
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%);
+  color: #ffffff;
+  border: none;
+  padding: 0 1.1rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.btn-fiscal-lookup:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-fiscal-lookup:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-top: 0.4rem;
+  animation: fadeIn 0.3s ease;
+}
+
+.verified-badge.success {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.verified-badge.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.totals-breakdown {
+  background: var(--sim-sunken);
+  border: 1px solid var(--admin-card-border);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.totals-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--admin-text-muted);
+}
+
+.totals-row.final {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--admin-text-main);
+  border-top: 1px dashed var(--admin-card-border);
+  padding-top: 0.6rem;
+  margin-top: 0.2rem;
+}
+
+.totals-row.final strong {
+  color: #38bdf8;
+  font-size: 1.3rem;
+}
+
+/* COMPROBANTE TÉRMICO / FACTURA ELECTRÓNICA */
+.ticket-preview-wrapper {
+  background: #f8fafc;
+  color: #0f172a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  max-width: 420px;
+  margin: 0 auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  border: 1px solid #cbd5e1;
+}
+
+.ticket-header {
+  text-align: center;
+  border-bottom: 1px dashed #64748b;
+  padding-bottom: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.ticket-header h4 {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.5px;
+  color: #0f172a;
+  font-family: inherit;
+}
+
+.ticket-doc-box {
+  border: 1px solid #0f172a;
+  padding: 6px;
+  margin: 8px 0;
+  text-align: center;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.ticket-meta {
+  border-bottom: 1px dashed #64748b;
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.ticket-meta div {
+  margin-bottom: 2px;
+}
+
+.ticket-items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 8px 0;
+}
+
+.ticket-items-table th {
+  text-align: left;
+  border-bottom: 1px solid #0f172a;
+  padding: 4px 0;
+  font-size: 11px;
+}
+
+.ticket-items-table td {
+  padding: 4px 0;
+  vertical-align: top;
+}
+
+.ticket-totals {
+  border-top: 1px dashed #64748b;
+  padding-top: 6px;
+  margin-top: 6px;
+}
+
+.ticket-totals-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.ticket-totals-row.grand {
+  font-weight: 800;
+  font-size: 13px;
+  border-top: 1px solid #0f172a;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+
+.ticket-footer {
+  text-align: center;
+  border-top: 1px dashed #64748b;
+  padding-top: 0.8rem;
+  margin-top: 0.8rem;
+  font-size: 11px;
+  color: #475569;
+}
+
+.ticket-qr {
+  width: 80px;
+  height: 80px;
+  margin: 8px auto;
+  display: block;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .modal-overlay.active,
+  .modal-overlay.active #printableInvoice,
+  .modal-overlay.active #printableInvoice * {
+    visibility: visible;
+  }
+  .modal-overlay.active {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+  .modal-overlay.active .modal-card {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .modal-overlay.active .modal-header,
+  .modal-overlay.active .invoice-actions-bar {
+    display: none !important;
+  }
+  .ticket-preview-wrapper {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 11pt !important;
+  }
+}
+

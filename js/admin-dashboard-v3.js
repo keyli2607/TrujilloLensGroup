@@ -172,14 +172,115 @@ const DEFAULT_ORDERS = {
     estado: 'listo',
     urgente: false,
     currentStep: 3
+// Base de datos de ventas iniciales (Óptica Trujillo)
+const DEFAULT_SALES = [
+  {
+    id: 'sale-1',
+    correlativo: 'B001-000427',
+    tipoDoc: 'boleta',
+    clienteDocTipo: 'DNI',
+    clienteDocNumero: '45892147',
+    clienteNombre: 'ANA LUCIA MORALES CHAVEZ',
+    clienteTelefono: '944123890',
+    clienteDireccion: 'Jr. Pizarro 420, Trujillo',
+    monturaNombre: 'Nano Vista Deportivo TR90',
+    monturaPrecio: 150,
+    lunasNombre: 'Policarbonato Antirreflejo HD',
+    lunasPrecio: 120,
+    descuento: 0,
+    subtotal: 228.81,
+    igv: 41.19,
+    total: 270.00,
+    metodoPago: 'Yape',
+    condicionPago: 'Pagado 100%',
+    fechaHora: 'Hoy 10:45 AM',
+    timestamp: Date.now() - 3600000 * 2,
+    estado: 'Pagado',
+    tallerGenerado: true
+  },
+  {
+    id: 'sale-2',
+    correlativo: 'B001-000426',
+    tipoDoc: 'boleta',
+    clienteDocTipo: 'DNI',
+    clienteDocNumero: '71245890',
+    clienteNombre: 'ROBERTO CARLOS CASTILLO DIAZ',
+    clienteTelefono: '958741236',
+    clienteDireccion: 'Av. Larco 820, Trujillo',
+    monturaNombre: 'Miraflex Flexible Azul',
+    monturaPrecio: 120,
+    lunasNombre: 'Resina Antirreflejo UV400',
+    lunasPrecio: 70,
+    descuento: 0,
+    subtotal: 161.02,
+    igv: 28.98,
+    total: 190.00,
+    metodoPago: 'Efectivo',
+    condicionPago: 'Pagado 100%',
+    fechaHora: 'Hoy 09:30 AM',
+    timestamp: Date.now() - 3600000 * 4,
+    estado: 'Pagado',
+    tallerGenerado: true
+  },
+  {
+    id: 'sale-3',
+    correlativo: 'F001-000185',
+    tipoDoc: 'factura',
+    clienteDocTipo: 'RUC',
+    clienteDocNumero: '20601234567',
+    clienteNombre: 'OPTICA Y CLINICA VISUAL DEL NORTE S.A.C.',
+    clienteTelefono: '962145873',
+    clienteDireccion: 'AV. ESPAÑA NRO. 1420, TRUJILLO, LA LIBERTAD',
+    monturaNombre: 'Ray-Ban Wayfarer Classic',
+    monturaPrecio: 420,
+    lunasNombre: 'Blue Protect UV420 Luz Azul',
+    lunasPrecio: 180,
+    descuento: 50,
+    subtotal: 466.10,
+    igv: 83.90,
+    total: 550.00,
+    metodoPago: 'Transferencia BCP',
+    condicionPago: 'Pagado 100%',
+    fechaHora: 'Ayer 06:15 PM',
+    timestamp: Date.now() - 86400000,
+    estado: 'Pagado',
+    tallerGenerado: true
+  },
+  {
+    id: 'sale-4',
+    correlativo: 'B001-000425',
+    tipoDoc: 'boleta',
+    clienteDocTipo: 'DNI',
+    clienteDocNumero: '40852963',
+    clienteNombre: 'MARIA ELENA GONZALES PAREDES',
+    clienteTelefono: '974581236',
+    clienteDireccion: 'Urb. California, Trujillo',
+    monturaNombre: 'Vogue Cat-Eye Elegance',
+    monturaPrecio: 350,
+    lunasNombre: 'Fotocromático Transition Gen 8',
+    lunasPrecio: 260,
+    descuento: 20,
+    subtotal: 500.00,
+    igv: 90.00,
+    total: 590.00,
+    metodoPago: 'Tarjeta',
+    condicionPago: 'Adelanto 50%',
+    fechaHora: 'Ayer 04:30 PM',
+    timestamp: Date.now() - 86400000 * 1.2,
+    estado: 'Adelanto 50%',
+    tallerGenerado: true
   }
-};
+];
 
 let state = {
   session: null,
   currentCategory: 'overview',
   orders: {},
   inventory: INVENTORY_DB,
+  sales: [...DEFAULT_SALES],
+  salesSearchQuery: '',
+  salesCorrelative: { boleta: 428, factura: 186, nota: 912 },
+  currentInvoice: null,
   currentFilter: 'all',
   searchQuery: '',
   charts: {},
@@ -198,7 +299,7 @@ const CATEGORY_NAMES = {
   'orders': 'Órdenes de Laboratorio',
   'inventory': 'Inventario & Stock Crítico',
   'catalog': 'Catálogo de Niños',
-  'catalog-adult ': 'Catálogo de Adultos',
+  'catalog-adult': 'Catálogo de Adultos',
   'sales': 'Historial de Ventas'
 };
 
@@ -330,6 +431,8 @@ window.switchCategory = function(categoryId) {
     renderAdultCatalog();
   } else if (categoryId === 'users') {
     renderUsers();
+  } else if (categoryId === 'sales') {
+    renderSales();
   }
 
   // Actualizar Breadcrumb
@@ -477,6 +580,32 @@ function setupEventListeners() {
   const chatbotForm = document.getElementById('chatbotForm');
   if (chatbotForm) {
     chatbotForm.addEventListener('submit', handleChatbotSubmit);
+  }
+
+  // Nueva Venta & Facturación
+  const formNewSale = document.getElementById('formNewSale');
+  if (formNewSale) {
+    formNewSale.addEventListener('submit', handleNewSaleSubmit);
+  }
+
+  // Búsqueda en historial de ventas
+  const salesSearchInput = document.getElementById('salesSearchInput');
+  if (salesSearchInput) {
+    salesSearchInput.addEventListener('input', (e) => {
+      state.salesSearchQuery = e.target.value.toLowerCase().trim();
+      renderSales();
+    });
+  }
+
+  // Enter en número de documento para consultar RENIEC / SUNAT
+  const saleCustomerDocNumber = document.getElementById('saleCustomerDocNumber');
+  if (saleCustomerDocNumber) {
+    saleCustomerDocNumber.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleConsultarFiscal();
+      }
+    });
   }
 }
 
@@ -776,66 +905,723 @@ function renderAdultCatalog() {
   }).join('');
 }
 
-window.startSale = function(frameId) {
-  let frame = MOCK_CATALOG.find(f => f.id === frameId) || MOCK_CATALOG_ADULT.find(f => f.id === frameId);
-  if (!frame) return;
+// ==========================================================================
+// 3.7 MÓDULO DE VENTAS, FACTURACIÓN ELECTRÓNICA & RENIEC / SUNAT
+// ==========================================================================
+function numeroALetras(amount) {
+  const units = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+  const teens = ['DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+  const tens = ['', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+  const hundreds = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
   
-  const modal = document.getElementById('modalSale');
-  if (modal) {
-    document.getElementById('saleFrameId').value = frame.id;
-    document.getElementById('saleFrameSummary').innerHTML = `
-      <div style="display: flex; gap: 1rem; align-items: center;">
-        <img src="${frame.image}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;">
-        <div>
-          <strong style="display: block; color: var(--admin-text-main);">${frame.brand} - ${frame.model}</strong>
-          <span style="color: var(--admin-primary);">S/ ${frame.price.toFixed(2)}</span>
-          <span style="color: var(--admin-text-muted); font-size: 0.8rem; margin-left: 0.5rem;">(Stock: ${frame.stock})</span>
-        </div>
-      </div>
-    `;
-    
-    document.getElementById('formSale').reset();
-    updateSaleTotal();
-    modal.classList.add('active');
+  const entero = Math.floor(amount);
+  const centavos = Math.round((amount - entero) * 100);
+  const centavosStr = String(centavos).padStart(2, '0');
+  
+  if (entero === 0) return `CERO CON ${centavosStr}/100 SOLES`;
+  if (entero === 100) return `CIEN CON ${centavosStr}/100 SOLES`;
+  
+  let texto = '';
+  if (entero >= 1000) {
+    const miles = Math.floor(entero / 1000);
+    texto += (miles === 1 ? 'MIL ' : units[miles] + ' MIL ');
   }
-};
-
-window.closeSaleModal = function() {
-  document.getElementById('modalSale')?.classList.remove('active');
-};
-
-window.updateSaleTotal = function() {
-  const frameId = document.getElementById('saleFrameId').value;
-  const frame = MOCK_CATALOG.find(f => f.id === frameId);
-  if (!frame) return;
-
-  const framePrice = frame.price;
-  const lensPrice = parseFloat(document.getElementById('saleLensType').value) || 0;
-  const discount = parseFloat(document.getElementById('saleDiscount').value) || 0;
-
-  const total = framePrice + lensPrice - discount;
-  document.getElementById('saleTotal').textContent = `S/ ${Math.max(0, total).toFixed(2)}`;
-};
-
-document.getElementById('formSale')?.addEventListener('submit', function(e) {
-  e.preventDefault();
+  const resto1000 = entero % 1000;
+  if (resto1000 >= 100) {
+    const c = Math.floor(resto1000 / 100);
+    texto += hundreds[c] + ' ';
+  }
+  const resto100 = resto1000 % 100;
+  if (resto100 >= 10 && resto100 <= 19) {
+    texto += teens[resto100 - 10] + ' ';
+  } else if (resto100 >= 20) {
+    const d = Math.floor(resto100 / 10);
+    const u = resto100 % 10;
+    if (d === 2 && u > 0) {
+      texto += 'VEINTI' + units[u] + ' ';
+    } else {
+      texto += tens[d] + (u > 0 ? ' Y ' + units[u] : '') + ' ';
+    }
+  } else if (resto100 > 0) {
+    texto += units[resto100] + ' ';
+  }
   
-  const frameId = document.getElementById('saleFrameId').value;
-  const frame = MOCK_CATALOG.find(f => f.id === frameId);
-  if (!frame) return;
+  return (texto.trim() + ` CON ${centavosStr}/100 SOLES`).toUpperCase();
+}
 
-  if (frame.stock <= 0) {
-    showToast('Error: No hay stock suficiente para esta montura.');
+window.renderSales = function() {
+  const tbody = document.getElementById('salesTableBody');
+  if (!tbody) return;
+
+  let list = state.sales || [];
+  if (state.salesSearchQuery) {
+    const q = state.salesSearchQuery.toLowerCase();
+    list = list.filter(s =>
+      (s.correlativo && s.correlativo.toLowerCase().includes(q)) ||
+      (s.clienteNombre && s.clienteNombre.toLowerCase().includes(q)) ||
+      (s.clienteDocNumero && s.clienteDocNumero.includes(q)) ||
+      (s.monturaNombre && s.monturaNombre.toLowerCase().includes(q))
+    );
+  }
+
+  // KPIs
+  const totalDay = state.sales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+  const salesTotalDayEl = document.getElementById('salesTotalDay');
+  if (salesTotalDayEl) {
+    salesTotalDayEl.textContent = `S/ ${totalDay.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  const salesFramesDayEl = document.getElementById('salesFramesDay');
+  if (salesFramesDayEl) {
+    salesFramesDayEl.textContent = state.sales.length;
+  }
+
+  if (list.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="8" style="text-align: center; padding: 2.5rem; color: var(--admin-text-muted);">
+          No se encontraron ventas con los criterios de búsqueda.
+        </td>
+      </tr>
+    `;
     return;
   }
 
-  // Descontar stock (simulación de transacción)
-  frame.stock -= 1;
-  
-  showToast(`Venta registrada con éxito. Stock de ${frame.model} actualizado.`);
-  closeSaleModal();
-  renderCatalog(); // Refrescar vista
-});
+  tbody.innerHTML = list.map(s => {
+    const isPaid = s.estado === 'Pagado';
+    const badgeClass = isPaid ? 'badge-listo' : 'badge-proceso';
+    const docPillColor = s.clienteDocTipo === 'RUC' ? '#38bdf8' : '#10b981';
+
+    return `
+      <tr>
+        <td>
+          <div style="font-weight: 800; font-family: monospace; color: var(--admin-primary); font-size: 0.95rem;">
+            ${s.correlativo}
+          </div>
+          <span style="font-size: 0.72rem; color: var(--admin-text-dim); text-transform: uppercase; font-weight: 600;">
+            ${s.tipoDoc === 'factura' ? 'Factura Electrónica' : s.tipoDoc === 'boleta' ? 'Boleta Electrónica' : 'Nota de Venta'}
+          </span>
+        </td>
+        <td>
+          <span style="font-size: 0.82rem; color: var(--admin-text-muted);">${s.fechaHora}</span>
+        </td>
+        <td>
+          <div style="font-weight: 700; color: var(--admin-text-main); font-size: 0.88rem;">${s.clienteNombre}</div>
+          ${s.clienteTelefono ? `<div style="font-size: 0.75rem; color: var(--admin-text-dim);">📞 ${s.clienteTelefono}</div>` : ''}
+        </td>
+        <td>
+          <div style="display: flex; align-items: center; gap: 0.3rem;">
+            <code style="font-size: 0.82rem; color: var(--admin-text-main); font-weight: 700;">${s.clienteDocNumero}</code>
+            <span style="font-size: 0.68rem; padding: 0.1rem 0.35rem; border-radius: 4px; background: rgba(56, 189, 248, 0.1); color: ${docPillColor}; font-weight: 700;">
+              ${s.clienteDocTipo}
+            </span>
+          </div>
+        </td>
+        <td style="max-width: 220px;">
+          <div style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            👓 ${s.monturaNombre}
+          </div>
+          <div style="font-size: 0.72rem; color: var(--admin-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            🔬 ${s.lunasNombre}
+          </div>
+        </td>
+        <td>
+          <strong style="color: #34d399; font-size: 0.95rem;">S/ ${Number(s.total).toFixed(2)}</strong>
+          <div style="font-size: 0.7rem; color: var(--admin-text-dim);">${s.metodoPago}</div>
+        </td>
+        <td>
+          <span class="badge-status ${badgeClass}">${s.estado}</span>
+        </td>
+        <td style="text-align: right;">
+          <div style="display: flex; gap: 0.35rem; justify-content: flex-end;">
+            <button type="button" class="btn-decision-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Ver Comprobante" onclick="openInvoiceModal('${s.id}')">
+              Ver
+            </button>
+            <button type="button" class="btn-decision-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: #25d366; border-color: rgba(37, 211, 102, 0.3);" title="Enviar por WhatsApp" onclick="sendInvoiceWhatsApp('${s.id}')">
+              WA
+            </button>
+            <button type="button" class="btn-decision-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Imprimir" onclick="printInvoiceById('${s.id}')">
+              🖨️
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+};
+
+window.setSaleDocType = function(type) {
+  const btnBoleta = document.getElementById('btnTypeBoleta');
+  const btnFactura = document.getElementById('btnTypeFactura');
+  const btnNota = document.getElementById('btnTypeNota');
+  const docTypeInput = document.getElementById('saleDocType');
+  const correlativoText = document.getElementById('saleCorrelativoText');
+  const docTypeSelect = document.getElementById('saleCustomerDocType');
+  const labelCustomerName = document.getElementById('labelCustomerName');
+  const addressGroup = document.getElementById('fieldCustomerAddressGroup');
+  const docNumberInput = document.getElementById('saleCustomerDocNumber');
+  const btnFiscalLookupText = document.getElementById('btnFiscalLookupText');
+
+  [btnBoleta, btnFactura, btnNota].forEach(b => b?.classList.remove('active'));
+
+  docTypeInput.value = type;
+
+  if (type === 'factura') {
+    btnFactura?.classList.add('active');
+    correlativoText.textContent = `F001-${String(state.salesCorrelative.factura).padStart(6, '0')}`;
+    docTypeSelect.value = 'RUC';
+    labelCustomerName.textContent = 'Razón Social de la Empresa';
+    docNumberInput.placeholder = 'Ingresa RUC (11 dígitos)';
+    docNumberInput.maxLength = 11;
+    btnFiscalLookupText.textContent = 'Consultar SUNAT';
+    if (addressGroup) addressGroup.style.display = 'block';
+  } else if (type === 'nota') {
+    btnNota?.classList.add('active');
+    correlativoText.textContent = `NV01-${String(state.salesCorrelative.nota).padStart(6, '0')}`;
+    labelCustomerName.textContent = 'Cliente';
+    docNumberInput.placeholder = 'DNI o documento';
+    btnFiscalLookupText.textContent = 'Consultar RENIEC';
+    if (addressGroup) addressGroup.style.display = 'none';
+  } else {
+    // Boleta
+    btnBoleta?.classList.add('active');
+    correlativoText.textContent = `B001-${String(state.salesCorrelative.boleta).padStart(6, '0')}`;
+    docTypeSelect.value = 'DNI';
+    labelCustomerName.textContent = 'Nombres y Apellidos del Paciente';
+    docNumberInput.placeholder = 'Ingresa DNI (8 dígitos)';
+    docNumberInput.maxLength = 8;
+    btnFiscalLookupText.textContent = 'Consultar RENIEC';
+    if (addressGroup) addressGroup.style.display = 'none';
+  }
+
+  const feedback = document.getElementById('saleDocFeedback');
+  if (feedback) feedback.innerHTML = '';
+};
+
+window.handleDocTypeSelectChange = function() {
+  const docType = document.getElementById('saleCustomerDocType').value;
+  const docNumberInput = document.getElementById('saleCustomerDocNumber');
+  const btnFiscalLookupText = document.getElementById('btnFiscalLookupText');
+  const addressGroup = document.getElementById('fieldCustomerAddressGroup');
+  const labelCustomerName = document.getElementById('labelCustomerName');
+
+  if (docType === 'RUC') {
+    docNumberInput.placeholder = 'Ingresa RUC (11 dígitos)';
+    docNumberInput.maxLength = 11;
+    btnFiscalLookupText.textContent = 'Consultar SUNAT';
+    labelCustomerName.textContent = 'Razón Social de la Empresa';
+    if (addressGroup) addressGroup.style.display = 'block';
+  } else {
+    docNumberInput.placeholder = 'Ingresa DNI (8 dígitos)';
+    docNumberInput.maxLength = 8;
+    btnFiscalLookupText.textContent = 'Consultar RENIEC';
+    labelCustomerName.textContent = 'Nombres y Apellidos del Paciente';
+    if (addressGroup && document.getElementById('saleDocType').value !== 'factura') {
+      addressGroup.style.display = 'none';
+    }
+  }
+
+  const feedback = document.getElementById('saleDocFeedback');
+  if (feedback) feedback.innerHTML = '';
+};
+
+window.handleConsultarFiscal = async function() {
+  const docType = document.getElementById('saleCustomerDocType').value;
+  const docNumber = document.getElementById('saleCustomerDocNumber').value.trim();
+  const feedbackEl = document.getElementById('saleDocFeedback');
+  const nameInput = document.getElementById('saleCustomerName');
+  const addressInput = document.getElementById('saleCustomerAddress');
+  const btnLookup = document.getElementById('btnFiscalLookup');
+  const btnText = document.getElementById('btnFiscalLookupText');
+
+  if (!docNumber) {
+    showToast('Ingresa un número de documento para consultar.');
+    return;
+  }
+
+  const prevText = btnText.textContent;
+  btnLookup.disabled = true;
+  btnText.textContent = 'Consultando...';
+
+  try {
+    if (docType === 'RUC' || docNumber.length === 11) {
+      if (docNumber.length !== 11) throw new Error('El RUC debe tener 11 dígitos.');
+      const data = await window.LG.fiscal.consultarRUC(docNumber);
+      nameInput.value = data.razonSocial || '';
+      if (addressInput) addressInput.value = data.direccion || 'TRUJILLO, LA LIBERTAD';
+      feedbackEl.innerHTML = `
+        <div class="verified-badge success">
+          ${LG.icon('check', { size: 14, sw: 2.5 })}
+          <span><strong>SUNAT:</strong> ${data.razonSocial} (${data.estado || 'ACTIVO'} - ${data.condicion || 'HABIDO'})</span>
+        </div>
+      `;
+      showToast(`RUC ${docNumber} verificado ante SUNAT`);
+    } else {
+      if (docNumber.length !== 8) throw new Error('El DNI debe tener 8 dígitos.');
+      const data = await window.LG.fiscal.consultarDNI(docNumber);
+      nameInput.value = data.nombreCompleto || '';
+      feedbackEl.innerHTML = `
+        <div class="verified-badge success">
+          ${LG.icon('check', { size: 14, sw: 2.5 })}
+          <span><strong>RENIEC:</strong> ${data.nombreCompleto}</span>
+        </div>
+      `;
+      showToast(`DNI ${docNumber} verificado ante RENIEC`);
+    }
+  } catch (err) {
+    feedbackEl.innerHTML = `
+      <div class="verified-badge warning">
+        <span>⚠️ ${err.message} Puedes ingresar los datos manualmente.</span>
+      </div>
+    `;
+    showToast(err.message);
+  } finally {
+    btnLookup.disabled = false;
+    btnText.textContent = prevText;
+  }
+};
+
+window.handleFrameSelectChange = function() {
+  const select = document.getElementById('saleFrameSelect');
+  const priceInput = document.getElementById('saleFramePrice');
+  const customFrameGroup = document.getElementById('fieldCustomFrameDesc');
+  const selectedOpt = select.options[select.selectedIndex];
+
+  if (!selectedOpt) return;
+
+  const price = parseFloat(selectedOpt.dataset.price) || 0;
+  priceInput.value = price;
+
+  if (select.value === 'custom') {
+    if (customFrameGroup) customFrameGroup.style.display = 'block';
+  } else {
+    if (customFrameGroup) customFrameGroup.style.display = 'none';
+  }
+
+  calculateNewSaleTotals();
+};
+
+window.handleLensTreatmentChange = function() {
+  const select = document.getElementById('saleLensTreatment');
+  const priceInput = document.getElementById('saleLensPrice');
+  const selectedOpt = select.options[select.selectedIndex];
+
+  if (!selectedOpt) return;
+
+  const price = parseFloat(selectedOpt.dataset.price) || 0;
+  priceInput.value = price;
+
+  calculateNewSaleTotals();
+};
+
+window.calculateNewSaleTotals = function() {
+  const framePrice = parseFloat(document.getElementById('saleFramePrice')?.value) || 0;
+  const lensPrice = parseFloat(document.getElementById('saleLensPrice')?.value) || 0;
+  const discount = parseFloat(document.getElementById('saleDiscount')?.value) || 0;
+
+  const subtotalNeto = framePrice + lensPrice;
+  const total = Math.max(0, subtotalNeto - discount);
+  const baseGravada = total / 1.18;
+  const igv = total - baseGravada;
+
+  const subtotalEl = document.getElementById('saleSubtotalDisplay');
+  const igvEl = document.getElementById('saleIgvDisplay');
+  const discountEl = document.getElementById('saleDiscountDisplay');
+  const totalEl = document.getElementById('saleTotalDisplay');
+
+  if (subtotalEl) subtotalEl.textContent = `S/ ${baseGravada.toFixed(2)}`;
+  if (igvEl) igvEl.textContent = `S/ ${igv.toFixed(2)}`;
+  if (discountEl) discountEl.textContent = `- S/ ${discount.toFixed(2)}`;
+  if (totalEl) totalEl.textContent = `S/ ${total.toFixed(2)}`;
+};
+
+window.openNewSaleModal = function(frameId = null) {
+  const modal = document.getElementById('modalNewSale');
+  const form = document.getElementById('formNewSale');
+  if (!modal || !form) return;
+
+  form.reset();
+  setSaleDocType('boleta');
+
+  if (frameId) {
+    const frameSelect = document.getElementById('saleFrameSelect');
+    if (frameSelect) {
+      frameSelect.value = frameId;
+      handleFrameSelectChange();
+    }
+  } else {
+    const frameSelect = document.getElementById('saleFrameSelect');
+    if (frameSelect && frameSelect.options.length > 1) {
+      frameSelect.selectedIndex = 1;
+      handleFrameSelectChange();
+    }
+  }
+
+  calculateNewSaleTotals();
+  modal.classList.add('active');
+};
+
+window.closeNewSaleModal = function() {
+  document.getElementById('modalNewSale')?.classList.remove('active');
+};
+
+window.startSale = function(frameId) {
+  openNewSaleModal(frameId);
+};
+
+window.closeSaleModal = function() {
+  closeNewSaleModal();
+};
+
+window.handleNewSaleSubmit = async function(e) {
+  e.preventDefault();
+
+  const docType = document.getElementById('saleDocType').value;
+  const customerDocType = document.getElementById('saleCustomerDocType').value;
+  const customerDocNumber = document.getElementById('saleCustomerDocNumber').value.trim();
+  const customerName = document.getElementById('saleCustomerName').value.trim();
+  const customerAddress = document.getElementById('saleCustomerAddress')?.value.trim() || 'Trujillo, La Libertad';
+  const customerPhone = document.getElementById('saleCustomerPhone').value.trim() || '944123890';
+  const customerEmail = document.getElementById('saleCustomerEmail')?.value.trim() || '';
+
+  const frameSelect = document.getElementById('saleFrameSelect');
+  let frameName = frameSelect.options[frameSelect.selectedIndex]?.dataset.name || 'Montura Oftálmica';
+  if (frameSelect.value === 'custom') {
+    const customName = document.getElementById('saleCustomFrameName')?.value.trim();
+    if (customName) frameName = customName;
+  }
+  const framePrice = parseFloat(document.getElementById('saleFramePrice').value) || 0;
+
+  const lensSelect = document.getElementById('saleLensTreatment');
+  const lensName = lensSelect.options[lensSelect.selectedIndex]?.text || 'Solo Montura';
+  const lensPrice = parseFloat(document.getElementById('saleLensPrice').value) || 0;
+
+  const rxOD = document.getElementById('saleRxOD')?.value.trim() || '';
+  const rxOI = document.getElementById('saleRxOI')?.value.trim() || '';
+  const rxDNP = document.getElementById('saleRxDNP')?.value.trim() || '';
+
+  const discount = parseFloat(document.getElementById('saleDiscount').value) || 0;
+  const total = Math.max(0, (framePrice + lensPrice) - discount);
+  const subtotal = total / 1.18;
+  const igv = total - subtotal;
+
+  const paymentMethod = document.getElementById('salePaymentMethod').value;
+  const paymentCondition = document.getElementById('salePaymentCondition').value;
+  const isPaid = paymentCondition.includes('100%');
+
+  // Correlativo según tipo
+  let correlativo = '';
+  if (docType === 'factura') {
+    correlativo = `F001-${String(state.salesCorrelative.factura).padStart(6, '0')}`;
+    state.salesCorrelative.factura++;
+  } else if (docType === 'nota') {
+    correlativo = `NV01-${String(state.salesCorrelative.nota).padStart(6, '0')}`;
+    state.salesCorrelative.nota++;
+  } else {
+    correlativo = `B001-${String(state.salesCorrelative.boleta).padStart(6, '0')}`;
+    state.salesCorrelative.boleta++;
+  }
+
+  const now = new Date();
+  const horaStr = now.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' });
+  const fechaStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear()}`;
+
+  const saleId = 'sale-' + Date.now();
+  const newSale = {
+    id: saleId,
+    correlativo,
+    tipoDoc: docType,
+    clienteDocTipo: customerDocType,
+    clienteDocNumero: customerDocNumber,
+    clienteNombre: customerName,
+    clienteDireccion: customerAddress,
+    clienteTelefono: customerPhone,
+    clienteEmail: customerEmail,
+    monturaNombre: frameName,
+    monturaPrecio: framePrice,
+    lunasNombre: lensName,
+    lunasPrecio: lensPrice,
+    rx: { od: rxOD, oi: rxOI, dnp: rxDNP },
+    descuento: discount,
+    subtotal: Number(subtotal.toFixed(2)),
+    igv: Number(igv.toFixed(2)),
+    total: Number(total.toFixed(2)),
+    totalEnLetras: numeroALetras(total),
+    metodoPago: paymentMethod,
+    condicionPago: paymentCondition,
+    estado: isPaid ? 'Pagado' : 'Adelanto 50%',
+    fechaHora: `Hoy ${horaStr}`,
+    fechaCompleta: `${fechaStr} ${horaStr}`,
+    timestamp: Date.now(),
+    tallerGenerado: document.getElementById('saleCreateWorkshopOrder')?.checked || false
+  };
+
+  // Guardar en estado de ventas
+  state.sales.unshift(newSale);
+
+  // Si se marcó orden de taller automática, generarla
+  if (newSale.tallerGenerado) {
+    const isUrgent = document.getElementById('saleWorkshopUrgency')?.value === 'urgente';
+    const orderNum = Math.floor(1000 + Math.random() * 9000);
+    const orderCode = `LGT-2026-${orderNum}`;
+    
+    state.orders[orderCode] = {
+      code: orderCode,
+      customer: customerName,
+      dni: customerDocNumber,
+      phone: customerPhone,
+      receivedDate: `${now.getDate()} de Marzo, 2026`,
+      estimatedDate: `${now.getDate() + (isUrgent ? 1 : 2)} de Marzo, 2026`,
+      brand: frameName.split(' ')[0] || 'LensGroup',
+      service: `${frameName} + ${lensName}`,
+      treatment: lensName,
+      price: total,
+      cost: Math.round(total * 0.4),
+      estado: 'cola',
+      urgente: isUrgent,
+      currentStep: 1
+    };
+
+    // Intentar sincronizar con Supabase
+    try {
+      if (window.LG?.supabase?.createOrder) {
+        window.LG.supabase.createOrder({
+          numero_ticket: orderCode,
+          estado: 'cola',
+          urgente: isUrgent,
+          paciente: customerName,
+          dni: customerDocNumber,
+          telefono: customerPhone,
+          montura: frameName,
+          luna: lensName,
+          total: total
+        }).catch(() => {});
+      }
+    } catch (e) {}
+  }
+
+  // Descontar inventario si coincide con catálogo
+  const matchedFrame = MOCK_CATALOG.find(f => f.id === frameSelect.value) || MOCK_CATALOG_ADULT.find(f => f.id === frameSelect.value);
+  if (matchedFrame && matchedFrame.stock > 0) {
+    matchedFrame.stock -= 1;
+    renderCatalog();
+    renderAdultCatalog();
+  }
+
+  closeNewSaleModal();
+  renderSales();
+  renderOrdersTable();
+  showToast(`¡${correlativo} emitido con éxito!`);
+
+  // Abrir visualizador e impresión del comprobante de inmediato
+  openInvoiceModal(newSale);
+};
+
+window.openInvoiceModal = function(saleOrId) {
+  let sale = saleOrId;
+  if (typeof saleOrId === 'string') {
+    sale = state.sales.find(s => s.id === saleOrId);
+  }
+  if (!sale) return;
+
+  state.currentInvoice = sale;
+  const ticketContent = document.getElementById('ticketContent');
+  if (!ticketContent) return;
+
+  const docTitle = sale.tipoDoc === 'factura' 
+    ? 'FACTURA ELECTRÓNICA' 
+    : sale.tipoDoc === 'nota' 
+      ? 'NOTA DE VENTA' 
+      : 'BOLETA DE VENTA ELECTRÓNICA';
+
+  ticketContent.innerHTML = `
+    <div class="ticket-header">
+      <h4>LENS GROUP TRUJILLO S.A.C.</h4>
+      <div>R.U.C. 20609502623</div>
+      <div>Jr. Gamarra N° 778 Int. 12 (Galería San Antonio)</div>
+      <div>Centro Histórico — Trujillo, La Libertad</div>
+      <div>WhatsApp: 944 123 890</div>
+      <div class="ticket-doc-box">
+        ${docTitle}<br>
+        <strong>${sale.correlativo}</strong>
+      </div>
+    </div>
+
+    <div class="ticket-meta">
+      <div><strong>FECHA EMISIÓN:</strong> ${sale.fechaCompleta || sale.fechaHora}</div>
+      <div><strong>CLIENTE:</strong> ${sale.clienteNombre}</div>
+      <div><strong>${sale.clienteDocTipo}:</strong> ${sale.clienteDocNumero}</div>
+      ${sale.clienteDireccion ? `<div><strong>DIRECCIÓN:</strong> ${sale.clienteDireccion}</div>` : ''}
+      <div><strong>MONEDA:</strong> SOLES (PEN)</div>
+      <div><strong>FORMA DE PAGO:</strong> ${sale.metodoPago} (${sale.condicionPago})</div>
+    </div>
+
+    <table class="ticket-items-table">
+      <thead>
+        <tr>
+          <th>CANT</th>
+          <th>DESCRIPCIÓN</th>
+          <th style="text-align: right;">IMPORTE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>
+            <strong>${sale.monturaNombre}</strong>
+            ${sale.rx && (sale.rx.od || sale.rx.oi) ? `<div style="font-size: 10px; color: #475569;">Rx OD:${sale.rx.od || '-'} OI:${sale.rx.oi || '-'}</div>` : ''}
+          </td>
+          <td style="text-align: right;">S/ ${Number(sale.monturaPrecio).toFixed(2)}</td>
+        </tr>
+        ${sale.lunasPrecio > 0 ? `
+        <tr>
+          <td>1</td>
+          <td>${sale.lunasNombre}</td>
+          <td style="text-align: right;">S/ ${Number(sale.lunasPrecio).toFixed(2)}</td>
+        </tr>` : ''}
+        ${sale.descuento > 0 ? `
+        <tr>
+          <td></td>
+          <td style="color: #dc2626;">Descuento Promocional</td>
+          <td style="text-align: right; color: #dc2626;">- S/ ${Number(sale.descuento).toFixed(2)}</td>
+        </tr>` : ''}
+      </tbody>
+    </table>
+
+    <div class="ticket-totals">
+      <div class="ticket-totals-row">
+        <span>OP. GRAVADA:</span>
+        <span>S/ ${Number(sale.subtotal).toFixed(2)}</span>
+      </div>
+      <div class="ticket-totals-row">
+        <span>I.G.V. (18%):</span>
+        <span>S/ ${Number(sale.igv).toFixed(2)}</span>
+      </div>
+      <div class="ticket-totals-row grand">
+        <span>TOTAL A PAGAR:</span>
+        <span>S/ ${Number(sale.total).toFixed(2)}</span>
+      </div>
+    </div>
+
+    <div style="margin-top: 8px; font-size: 11px; text-align: center; font-weight: 700;">
+      SON: ${sale.totalEnLetras || numeroALetras(sale.total)}
+    </div>
+
+    <div class="ticket-footer">
+      <!-- Código QR Simulado SVG para validación fiscal -->
+      <svg class="ticket-qr" viewBox="0 0 100 100" fill="#0f172a">
+        <path d="M10,10 h30 v30 h-30 z M15,15 v20 h20 v-20 z M20,20 h10 v10 h-10 z" />
+        <path d="M60,10 h30 v30 h-30 z M65,15 v20 h20 v-20 z M70,20 h10 v10 h-10 z" />
+        <path d="M10,60 h30 v30 h-30 z M15,65 v20 h20 v-20 z M20,70 h10 v10 h-10 z" />
+        <rect x="45" y="10" width="8" height="8" />
+        <rect x="45" y="25" width="8" height="15" />
+        <rect x="60" y="45" width="15" height="8" />
+        <rect x="80" y="45" width="10" height="15" />
+        <rect x="45" y="60" width="8" height="30" />
+        <rect x="60" y="70" width="30" height="8" />
+        <rect x="75" y="82" width="15" height="8" />
+      </svg>
+      <div>Código Hash: <strong>qL8v92H/LtG-OptTruj=${sale.correlativo.slice(-4)}</strong></div>
+      <div style="margin-top: 4px;">Representación impresa de la ${docTitle}. Puede verificar su validez electrónica ante SUNAT.</div>
+      <div style="margin-top: 6px; font-weight: 700;">¡Gracias por cuidar su salud visual con Lens Group!</div>
+    </div>
+  `;
+
+  document.getElementById('modalInvoiceViewer')?.classList.add('active');
+};
+
+window.closeInvoiceModal = function() {
+  document.getElementById('modalInvoiceViewer')?.classList.remove('active');
+};
+
+window.printCurrentInvoice = function() {
+  window.print();
+};
+
+window.printInvoiceById = function(saleId) {
+  openInvoiceModal(saleId);
+  setTimeout(() => window.print(), 250);
+};
+
+window.sendInvoiceWhatsApp = function(saleId) {
+  openInvoiceModal(saleId);
+  sendCurrentInvoiceWhatsApp();
+};
+
+window.sendCurrentInvoiceWhatsApp = function() {
+  const sale = state.currentInvoice;
+  if (!sale) return;
+
+  const phone = (sale.clienteTelefono || '').replace(/\D/g, '');
+  const cleanPhone = phone.length === 9 ? `51${phone}` : phone.length === 11 ? phone : '51944123890';
+
+  const docTitle = sale.tipoDoc === 'factura' ? 'Factura Electrónica' : 'Boleta de Venta Electrónica';
+  const msg = [
+    `👓 *LENS GROUP TRUJILLO*`,
+    `Hola ${sale.clienteNombre}, adjuntamos su comprobante de pago:`,
+    ``,
+    `📄 *${docTitle}:* ${sale.correlativo}`,
+    `👤 *Cliente:* ${sale.clienteNombre} (${sale.clienteDocTipo}: ${sale.clienteDocNumero})`,
+    `📅 *Fecha:* ${sale.fechaCompleta || sale.fechaHora}`,
+    `--------------------------------`,
+    `• Montura: ${sale.monturaNombre} (S/ ${Number(sale.monturaPrecio).toFixed(2)})`,
+    sale.lunasPrecio > 0 ? `• Lunas: ${sale.lunasNombre} (S/ ${Number(sale.lunasPrecio).toFixed(2)})` : null,
+    sale.descuento > 0 ? `• Descuento: - S/ ${Number(sale.descuento).toFixed(2)}` : null,
+    `--------------------------------`,
+    `💰 *TOTAL PAGADO: S/ ${Number(sale.total).toFixed(2)}*`,
+    `💳 *Método de Pago:* ${sale.metodoPago}`,
+    ``,
+    `📍 Sede: Jr. Gamarra N° 778 Int. 12 (Galería San Antonio), Trujillo`,
+    `Consulte el estado de su orden en: https://lensgrouptrujillo.com/seguimiento.html`,
+    `¡Gracias por su preferencia!`
+  ].filter(Boolean).join('\n');
+
+  const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+};
+
+window.copyInvoiceText = function() {
+  const sale = state.currentInvoice;
+  if (!sale) return;
+  const text = `Comprobante: ${sale.correlativo}\nCliente: ${sale.clienteNombre}\nDoc: ${sale.clienteDocNumero}\nTotal: S/ ${sale.total.toFixed(2)}`;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Datos del comprobante copiados al portapapeles');
+  });
+};
+
+window.exportSalesToCsv = function() {
+  const sales = state.sales || [];
+  if (!sales.length) return showToast('No hay ventas para exportar');
+
+  const headers = ['Comprobante', 'Tipo', 'Doc Tipo', 'Doc Numero', 'Cliente', 'Telefono', 'Montura', 'Lunas', 'Subtotal', 'IGV', 'Total', 'Metodo Pago', 'Estado', 'Fecha'];
+  const rows = sales.map(s => [
+    `"${s.correlativo}"`,
+    `"${s.tipoDoc}"`,
+    `"${s.clienteDocTipo}"`,
+    `"${s.clienteDocNumero}"`,
+    `"${s.clienteNombre}"`,
+    `"${s.clienteTelefono || ''}"`,
+    `"${s.monturaNombre}"`,
+    `"${s.lunasNombre}"`,
+    s.subtotal,
+    s.igv,
+    s.total,
+    `"${s.metodoPago}"`,
+    `"${s.estado}"`,
+    `"${s.fechaCompleta || s.fechaHora}"`
+  ]);
+
+  const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Ventas_LensGroup_Trujillo_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Historial de ventas exportado a CSV');
+};
+
 
 // ==========================================================================
 // 4. AUTENTICACIÓN
@@ -1226,6 +2012,7 @@ async function loadOrders() {
   renderInventory();
   renderCharts();
   updateSimulator();
+  renderSales();
 }
 
 function renderOrdersTable() {

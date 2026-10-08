@@ -236,8 +236,18 @@
         <section class="dash-view" id="view-sales">
           <div class="view-header">
             <div class="view-title-group">
-              <h2>Historial y Analítica de Ventas</h2>
-              <p>Registro de transacciones y productos más vendidos.</p>
+              <h2>Historial y Facturación de Ventas</h2>
+              <p>Emisión y control de Boletas, Facturas electrónicas (SUNAT/RENIEC) y comprobantes.</p>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button type="button" class="btn-primary-action" id="btnOpenNewSaleModal" onclick="openNewSaleModal()">
+                ${LG.icon('plus', { size: 16, sw: 2.5 })}
+                <span>+ Nueva Venta / Boleta</span>
+              </button>
+              <button type="button" class="btn-header-action" onclick="exportSalesToCsv()">
+                ${LG.icon('download', { size: 14, sw: 2 })}
+                <span>Exportar Ventas</span>
+              </button>
             </div>
           </div>
           <div class="kpi-grid">
@@ -247,7 +257,7 @@
                 <span class="kpi-icon" style="background: rgba(13, 148, 136, 0.1); color: #0d9488;">S/</span>
               </div>
               <div class="kpi-value" id="salesTotalDay">S/ 1,420.00</div>
-              <div class="kpi-footer"><span class="kpi-trend trend-up">↑ 12% vs ayer</span></div>
+              <div class="kpi-footer"><span class="kpi-trend trend-up">↑ Hoy en Trujillo</span></div>
             </div>
             <div class="kpi-card" style="--kpi-color: #3b82f6;">
               <div class="kpi-header">
@@ -262,7 +272,7 @@
                 <span class="kpi-label">Mejor Vendedor (Semana)</span>
                 <span class="kpi-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">⭐</span>
               </div>
-              <div class="kpi-value">Dr. Miranda</div>
+              <div class="kpi-value" id="salesTopSeller">Dr. Miranda</div>
               <div class="kpi-footer"><span class="kpi-trend">22 Ventas cerradas</span></div>
             </div>
           </div>
@@ -275,19 +285,29 @@
               </div>
             </div>
             <div class="chart-card col-8">
-              <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center;">
-                <h3>Últimas Transacciones</h3>
-                <button class="btn-decision-action">Exportar Excel</button>
+              <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <h3>Transacciones y Comprobantes</h3>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="text" id="salesSearchInput" class="form-input" placeholder="Buscar por comprobante, cliente o doc..." style="font-size: 0.82rem; padding: 0.35rem 0.75rem; width: 230px;">
+                  <button type="button" class="btn-primary-action" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="openNewSaleModal()">+ Emitir</button>
+                </div>
               </div>
               <div class="table-responsive" style="border: none;">
                 <table class="admin-table">
                   <thead>
-                    <tr><th>Hora</th><th>Paciente</th><th>Montura</th><th>Total</th><th>Estado</th></tr>
+                    <tr>
+                      <th>Comprobante</th>
+                      <th>Fecha / Hora</th>
+                      <th>Cliente / Razón Social</th>
+                      <th>DNI / RUC</th>
+                      <th>Detalle</th>
+                      <th>Total</th>
+                      <th>Estado</th>
+                      <th style="text-align: right;">Acciones</th>
+                    </tr>
                   </thead>
                   <tbody id="salesTableBody">
-                    <tr><td>10:45 AM</td><td>María Gonzáles</td><td>Nano Vista TR90</td><td><strong>S/ 270.00</strong></td><td><span class="badge-status badge-listo">Pagado</span></td></tr>
-                    <tr><td>09:30 AM</td><td>Luis Ramírez</td><td>Miraflex Flexible</td><td><strong>S/ 190.00</strong></td><td><span class="badge-status badge-listo">Pagado</span></td></tr>
-                    <tr><td>Ayer 06:15 PM</td><td>Carmen Luján</td><td>Ray-Ban Kids</td><td><strong>S/ 330.00</strong></td><td><span class="badge-status badge-proceso">Adelanto 50%</span></td></tr>
+                    <tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">Cargando historial de ventas...</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -829,45 +849,274 @@
         </div>
       </div>
 
-      <!-- MODAL VENTA -->
-      <div class="modal-overlay" id="modalSale">
-        <div class="modal-card" style="max-width: 500px;">
+      <!-- MODAL NUEVA VENTA & FACTURACIÓN ELECTRÓNICA -->
+      <div class="modal-overlay" id="modalNewSale">
+        <div class="modal-card" style="max-width: 680px; max-height: 90vh; overflow-y: auto;">
           <div class="modal-header">
-            <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--admin-text-main);">Procesar Venta</h3>
-            <button type="button" class="modal-close-btn" onclick="closeSaleModal()">✕</button>
-          </div>
-          <form id="formSale" style="display: flex; flex-direction: column; gap: 1rem;">
-            <input type="hidden" id="saleFrameId">
-            <div class="form-group">
-              <label class="form-label">Montura Seleccionada</label>
-              <div id="saleFrameSummary" style="padding: 1rem; background: var(--admin-bg-alt); border: 1px solid var(--admin-card-border); border-radius: 8px; font-size: 0.9rem;"></div>
+            <div>
+              <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--admin-text-main); margin: 0;">Nueva Venta &amp; Facturación Electrónica</h3>
+              <p style="font-size: 0.8rem; color: var(--admin-text-muted); margin: 0.2rem 0 0 0;">Lens Group Trujillo S.A.C. • RUC 20609502623 • Jr. Gamarra 778</p>
             </div>
-            <div class="form-group"><label class="form-label" for="salePatient">Cliente / Paciente</label><input type="text" id="salePatient" class="form-input" style="padding-left: 0.9rem;" placeholder="Ej. Juanito Pérez" required></div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="form-group">
-                <label class="form-label" for="saleLensType">Tipo de Lunas</label>
-                <select id="saleLensType" class="form-input" style="padding-left: 0.9rem;" onchange="updateSaleTotal()">
-                  <option value="0">Solo Montura (S/ 0)</option><option value="70">Resina UV400 (S/ 70)</option><option value="120">Policarbonato (S/ 120)</option><option value="180">Antirreflejo Blue Protect (S/ 180)</option>
+            <button type="button" class="modal-close-btn" onclick="closeNewSaleModal()">✕</button>
+          </div>
+
+          <form id="formNewSale" style="display: flex; flex-direction: column; gap: 1.2rem; margin-top: 0.5rem;">
+            <input type="hidden" id="saleDocType" value="boleta">
+
+            <!-- Selector de Tipo de Comprobante -->
+            <div>
+              <label class="form-label">Tipo de Comprobante de Pago</label>
+              <div class="fiscal-type-selector">
+                <button type="button" class="fiscal-type-btn active" id="btnTypeBoleta" onclick="setSaleDocType('boleta')">
+                  📄 Boleta Electrónica (B001)
+                </button>
+                <button type="button" class="fiscal-type-btn" id="btnTypeFactura" onclick="setSaleDocType('factura')">
+                  🏢 Factura Electrónica (F001)
+                </button>
+                <button type="button" class="fiscal-type-btn" id="btnTypeNota" onclick="setSaleDocType('nota')">
+                  📋 Nota de Venta (NV01)
+                </button>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.4rem; font-size: 0.78rem; color: var(--admin-text-muted);">
+                <span>Serie &amp; Correlativo asignado:</span>
+                <strong id="saleCorrelativoText" style="color: var(--admin-primary); font-family: monospace; font-size: 0.88rem;">B001-000428</strong>
+              </div>
+            </div>
+
+            <!-- Datos del Cliente y Consulta RENIEC / SUNAT -->
+            <div style="background: var(--admin-bg-alt); padding: 1rem; border-radius: 8px; border: 1px solid var(--admin-card-border);">
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--admin-text-main); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+                ${LG.icon('userCheck', { size: 16, sw: 2 })}
+                <span>Datos del Cliente &amp; Validación de Identidad</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 140px 1fr; gap: 0.75rem;">
+                <div class="form-group">
+                  <label class="form-label" for="saleCustomerDocType">Documento</label>
+                  <select id="saleCustomerDocType" class="form-input" style="padding-left: 0.6rem;" onchange="handleDocTypeSelectChange()">
+                    <option value="DNI" selected>DNI (8 dígitos)</option>
+                    <option value="RUC">RUC (11 dígitos)</option>
+                    <option value="CE">Carnet Ext.</option>
+                    <option value="SIN_DOC">Sin Documento</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="saleCustomerDocNumber">Número de Identificación</label>
+                  <div class="fiscal-input-group">
+                    <input type="text" id="saleCustomerDocNumber" class="form-input" placeholder="Ingresa DNI (8 dígitos)" maxlength="11" required style="padding-left: 0.8rem; font-weight: 600;">
+                    <button type="button" id="btnFiscalLookup" class="btn-fiscal-lookup" onclick="handleConsultarFiscal()">
+                      ${LG.icon('search', { size: 14, sw: 2 })}
+                      <span id="btnFiscalLookupText">Consultar RENIEC</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Feedback visual de consulta RENIEC / SUNAT -->
+              <div id="saleDocFeedback"></div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem;">
+                <div class="form-group" style="grid-column: span 2;" id="fieldCustomerNameGroup">
+                  <label class="form-label" for="saleCustomerName" id="labelCustomerName">Nombres y Apellidos del Paciente</label>
+                  <input type="text" id="saleCustomerName" class="form-input" style="padding-left: 0.8rem;" placeholder="Ej. Carlos Mendoza Quispe" required>
+                </div>
+
+                <div class="form-group" style="grid-column: span 2; display: none;" id="fieldCustomerAddressGroup">
+                  <label class="form-label" for="saleCustomerAddress">Dirección Fiscal (SUNAT)</label>
+                  <input type="text" id="saleCustomerAddress" class="form-input" style="padding-left: 0.8rem;" placeholder="Ej. Jr. Gamarra 778, Trujillo">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="saleCustomerPhone">Teléfono / WhatsApp (para comprobante)</label>
+                  <input type="tel" id="saleCustomerPhone" class="form-input" style="padding-left: 0.8rem;" placeholder="944 123 890" value="944123890">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="saleCustomerEmail">Correo Electrónico (Opcional)</label>
+                  <input type="email" id="saleCustomerEmail" class="form-input" style="padding-left: 0.8rem;" placeholder="cliente@correo.com">
+                </div>
+              </div>
+            </div>
+
+            <!-- Detalle de Productos: Montura y Lunas -->
+            <div style="background: var(--admin-bg-alt); padding: 1rem; border-radius: 8px; border: 1px solid var(--admin-card-border);">
+              <div style="font-size: 0.85rem; font-weight: 700; color: var(--admin-text-main); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem;">
+                ${LG.icon('box3d', { size: 16, sw: 2 })}
+                <span>Montura y Tratamiento Óptico</span>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 140px; gap: 0.75rem;">
+                <div class="form-group">
+                  <label class="form-label" for="saleFrameSelect">Selección de Montura</label>
+                  <select id="saleFrameSelect" class="form-input" style="padding-left: 0.6rem;" onchange="handleFrameSelectChange()">
+                    <option value="" data-price="0">-- Seleccionar Montura del Catálogo --</option>
+                    <optgroup label="Línea Infantil &amp; Niños">
+                      <option value="frm-1" data-price="120" data-name="Miraflex Flexible Azul">Miraflex Flexible Azul (S/ 120.00)</option>
+                      <option value="frm-2" data-price="150" data-name="Nano Vista Deportivo TR90">Nano Vista Deportivo TR90 (S/ 150.00)</option>
+                      <option value="frm-4" data-price="210" data-name="Ray-Ban Junior Wayfarer">Ray-Ban Junior Wayfarer (S/ 210.00)</option>
+                      <option value="frm-5" data-price="120" data-name="Miraflex Flexible Lila">Miraflex Flexible Lila (S/ 120.00)</option>
+                    </optgroup>
+                    <optgroup label="Línea Adultos &amp; Juvenil">
+                      <option value="frm-a1" data-price="420" data-name="Ray-Ban Wayfarer Classic">Ray-Ban Wayfarer Classic (S/ 420.00)</option>
+                      <option value="frm-a2" data-price="480" data-name="Oakley Holbrook Polarized">Oakley Holbrook Polarized (S/ 480.00)</option>
+                      <option value="frm-a3" data-price="350" data-name="Vogue Cat-Eye Elegance">Vogue Cat-Eye Elegance (S/ 350.00)</option>
+                      <option value="frm-a4" data-price="550" data-name="Carrera Titanium Aviator">Carrera Titanium Aviator (S/ 550.00)</option>
+                    </optgroup>
+                    <option value="custom" data-price="180" data-name="Montura Personalizada">➕ Otra Montura / Montura del Cliente</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="saleFramePrice">Precio Montura (S/)</label>
+                  <input type="number" id="saleFramePrice" class="form-input" style="padding-left: 0.8rem;" value="0" min="0" step="0.01" oninput="calculateNewSaleTotals()">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-top: 0.75rem;" id="fieldCustomFrameDesc" style="display: none;">
+                <label class="form-label" for="saleCustomFrameName">Descripción de Montura</label>
+                <input type="text" id="saleCustomFrameName" class="form-input" style="padding-left: 0.8rem;" placeholder="Ej. Montura Oftálmica Acetato Carey">
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 140px; gap: 0.75rem; margin-top: 0.75rem;">
+                <div class="form-group">
+                  <label class="form-label" for="saleLensTreatment">Lunas &amp; Tratamiento de Superficie</label>
+                  <select id="saleLensTreatment" class="form-input" style="padding-left: 0.6rem;" onchange="handleLensTreatmentChange()">
+                    <option value="0" data-price="0">Solo Montura (Sin Lunas - S/ 0)</option>
+                    <option value="70" data-price="70" selected>Resina Antirreflejo UV400 (S/ 70.00)</option>
+                    <option value="120" data-price="120">Policarbonato Antirreflejo HD (S/ 120.00)</option>
+                    <option value="180" data-price="180">Blue Protect UV420 Luz Azul (S/ 180.00)</option>
+                    <option value="260" data-price="260">Fotocromático Transition Gen 8 (S/ 260.00)</option>
+                    <option value="380" data-price="380">Progresivo Digital FreeForm HD (S/ 380.00)</option>
+                    <option value="490" data-price="490">Multifocal Progresivo + Blue + Transition (S/ 490.00)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="saleLensPrice">Precio Lunas (S/)</label>
+                  <input type="number" id="saleLensPrice" class="form-input" style="padding-left: 0.8rem;" value="70" min="0" step="0.01" oninput="calculateNewSaleTotals()">
+                </div>
+              </div>
+
+              <!-- Receta Óptica (Rx) -->
+              <div style="margin-top: 0.75rem; border-top: 1px dashed var(--admin-card-border); padding-top: 0.75rem;">
+                <label class="form-label" style="display: flex; justify-content: space-between;">
+                  <span>Graduación / Receta Óptica (Rx)</span>
+                  <span style="font-size: 0.72rem; color: var(--admin-text-muted);">Opcional</span>
+                </label>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 100px; gap: 0.5rem;">
+                  <input type="text" id="saleRxOD" class="form-input" style="padding-left: 0.5rem; font-size: 0.8rem;" placeholder="OD: Esf, Cil, Eje">
+                  <input type="text" id="saleRxOI" class="form-input" style="padding-left: 0.5rem; font-size: 0.8rem;" placeholder="OI: Esf, Cil, Eje">
+                  <input type="text" id="saleRxDNP" class="form-input" style="padding-left: 0.5rem; font-size: 0.8rem;" placeholder="DNP: mm">
+                </div>
+              </div>
+
+              <!-- Integración con Taller / Laboratorio -->
+              <div style="margin-top: 0.75rem; display: flex; align-items: center; justify-content: space-between; background: var(--sim-sunken); padding: 0.6rem 0.8rem; border-radius: 6px; border: 1px solid var(--admin-card-border);">
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.82rem; color: var(--admin-text-main); cursor: pointer; margin: 0;">
+                  <input type="checkbox" id="saleCreateWorkshopOrder" checked style="width: 16px; height: 16px; accent-color: var(--admin-primary);">
+                  <span>Enviar orden a Laboratorio / Taller automáticamente</span>
+                </label>
+                <select id="saleWorkshopUrgency" class="form-input" style="width: 110px; padding: 0.2rem 0.5rem; font-size: 0.78rem;">
+                  <option value="normal">Normal</option>
+                  <option value="urgente">⚡ Urgente</option>
                 </select>
               </div>
-              <div class="form-group"><label class="form-label" for="saleDiscount">Descuento (S/)</label><input type="number" id="saleDiscount" class="form-input" style="padding-left: 0.9rem;" value="0" min="0" oninput="updateSaleTotal()"></div>
             </div>
-            <div class="form-group">
-              <label class="form-label">Receta Óptica (Rx)</label>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                <input type="text" class="form-input" style="padding-left: 0.5rem; font-size: 0.8rem;" placeholder="OD: Esf, Cil, Eje">
-                <input type="text" class="form-input" style="padding-left: 0.5rem; font-size: 0.8rem;" placeholder="OI: Esf, Cil, Eje">
+
+            <!-- Pago, Totales y Desglose Tributario -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <div class="form-group">
+                  <label class="form-label" for="salePaymentMethod">Método de Pago</label>
+                  <select id="salePaymentMethod" class="form-input" style="padding-left: 0.6rem;">
+                    <option value="Efectivo" selected>💵 Efectivo Soles</option>
+                    <option value="Yape">📱 Yape (Trujillo)</option>
+                    <option value="Plin">📱 Plin</option>
+                    <option value="Tarjeta">💳 Tarjeta Débito / Crédito (POS)</option>
+                    <option value="Transferencia BCP">🏦 Transferencia BCP / BBVA</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="salePaymentCondition">Condición de Pago</label>
+                  <select id="salePaymentCondition" class="form-input" style="padding-left: 0.6rem;">
+                    <option value="Pagado 100%" selected>Pagado 100% (Cancelado)</option>
+                    <option value="Adelanto 50%">Adelanto 50% (Saldo contraentrega)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="saleDiscount">Descuento Especial (S/)</label>
+                  <input type="number" id="saleDiscount" class="form-input" style="padding-left: 0.8rem;" value="0" min="0" step="0.01" oninput="calculateNewSaleTotals()">
+                </div>
+              </div>
+
+              <!-- Resumen Tributario -->
+              <div class="totals-breakdown">
+                <div class="totals-row">
+                  <span>Op. Gravadas (Base):</span>
+                  <span id="saleSubtotalDisplay">S/ 0.00</span>
+                </div>
+                <div class="totals-row">
+                  <span>I.G.V. (18%):</span>
+                  <span id="saleIgvDisplay">S/ 0.00</span>
+                </div>
+                <div class="totals-row" style="color: #ef4444;">
+                  <span>Descuento:</span>
+                  <span id="saleDiscountDisplay">- S/ 0.00</span>
+                </div>
+                <div class="totals-row final">
+                  <span>TOTAL A COBRAR:</span>
+                  <strong id="saleTotalDisplay">S/ 0.00</strong>
+                </div>
               </div>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--admin-card-border);">
-              <span style="color: var(--admin-text-muted);">Total a Cobrar:</span>
-              <strong id="saleTotal" style="font-size: 1.5rem; color: var(--admin-accent);">S/ 0.00</strong>
-            </div>
-            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1rem;">
-              <button type="button" class="btn-header-action" onclick="closeSaleModal()">Cancelar</button>
-              <button type="submit" class="btn-primary-action">Confirmar Venta</button>
+
+            <!-- Botones de Acción -->
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 0.5rem; border-top: 1px solid var(--admin-card-border); padding-top: 1rem;">
+              <button type="button" class="btn-header-action" onclick="closeNewSaleModal()">Cancelar</button>
+              <button type="submit" class="btn-primary-action" style="padding: 0.6rem 1.5rem; font-size: 0.95rem;">
+                ${LG.icon('check', { size: 16, sw: 2.5 })}
+                <span>Emitir Comprobante &amp; Cobrar</span>
+              </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      <!-- MODAL VISUALIZADOR DE COMPROBANTE ELECTRÓNICO (IMPRESIÓN / WHATSAPP) -->
+      <div class="modal-overlay" id="modalInvoiceViewer">
+        <div class="modal-card" style="max-width: 520px; max-height: 92vh; overflow-y: auto;">
+          <div class="modal-header">
+            <div>
+              <h3 style="font-size: 1.15rem; font-weight: 800; color: var(--admin-text-main); margin: 0;">Comprobante Electrónico Emitido</h3>
+              <p style="font-size: 0.78rem; color: var(--admin-text-muted); margin: 0.2rem 0 0 0;">Listo para imprimir en ticketera térmica (80mm) o enviar por WhatsApp</p>
+            </div>
+            <button type="button" class="modal-close-btn" onclick="closeInvoiceModal()">✕</button>
+          </div>
+
+          <!-- Barra de Acciones del Comprobante -->
+          <div class="invoice-actions-bar" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+            <button type="button" class="btn-primary-action" style="flex: 1; justify-content: center;" onclick="printCurrentInvoice()">
+              ${LG.icon('printer', { size: 16, sw: 2 })}
+              <span>Imprimir Ticket</span>
+            </button>
+            <button type="button" class="btn-header-action" style="flex: 1; justify-content: center; background: #25d366; color: #fff; border-color: #25d366;" onclick="sendCurrentInvoiceWhatsApp()">
+              ${LG.icon('chat', { size: 16, sw: 2 })}
+              <span>Enviar WhatsApp</span>
+            </button>
+            <button type="button" class="btn-header-action" style="padding: 0.5rem 0.8rem;" title="Copiar Datos" onclick="copyInvoiceText()">
+              ${LG.icon('clipboard', { size: 16, sw: 2 })}
+            </button>
+          </div>
+
+          <!-- Representación Impresa Oficial del Comprobante Térmico -->
+          <div id="printableInvoice">
+            <div class="ticket-preview-wrapper" id="ticketContent">
+              <!-- Renderizado dinámicamente con los datos de la venta -->
+            </div>
+          </div>
         </div>
       </div>
 
