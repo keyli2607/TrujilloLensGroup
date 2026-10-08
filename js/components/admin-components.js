@@ -145,10 +145,10 @@
             </div>
           </button>
 
-          <!-- 3. OPERACIONES DE SEDE Y PACIENTES (Admin / Clínica) -->
-          <div class="sidebar-section-label" data-roles="admin,superadmin" style="margin-top: 0.5rem;">Atención &amp; Pacientes</div>
+          <!-- 3. OPERACIONES DE SEDE Y PACIENTES (Laboratorio & Clínica / Admin / Superadmin) -->
+          <div class="sidebar-section-label" data-roles="clinical,admin,superadmin" style="margin-top: 0.5rem;">Atención &amp; Pacientes</div>
 
-          <button type="button" class="sidebar-nav-btn" data-view="orders" data-roles="admin,superadmin">
+          <button type="button" class="sidebar-nav-btn" data-view="orders" data-roles="clinical,admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('fileText', { size: 18, sw: 2 })}
               <span>Pacientes &amp; Órdenes</span>
@@ -156,7 +156,7 @@
             <span class="nav-badge-pill" id="sidebarOrdersBadge">8</span>
           </button>
 
-          <button type="button" class="sidebar-nav-btn" data-view="postventa" data-roles="admin,superadmin">
+          <button type="button" class="sidebar-nav-btn" data-view="postventa" data-roles="clinical,admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('checkCircle', { size: 18, sw: 2 })}
               <span>Seguimiento Postventa</span>

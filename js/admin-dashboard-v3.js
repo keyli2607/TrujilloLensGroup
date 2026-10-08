@@ -338,9 +338,17 @@ function initAuth() {
   showLoginView();
 }
 
+function isUserClinical() {
+  if (!state.session) return false;
+  const role = String(state.session.role || '').toLowerCase().trim();
+  return role.includes('laborat') || role.includes('clinic') || role.includes('clínic') || 
+         role.includes('optom') || role.includes('taller');
+}
+
 function isUserSeller() {
   if (!state.session) return false;
   if (state.session.isSuperAdmin === true) return false;
+  if (isUserClinical()) return false;
   const role = String(state.session.role || '').toLowerCase().trim();
   if (role.includes('vent') || role.includes('vendedor') || role.includes('seller') || role.includes('comercial')) {
     return true;
@@ -363,10 +371,16 @@ function showDashboardView() {
   document.getElementById('dashboardScreen').style.display = 'flex';
   
   if (state.session) {
+    // Laboratorio y Clínica NUNCA es super admin
+    if (isUserClinical()) {
+      state.session.isSuperAdmin = false;
+    }
+
     const displayName = state.session.name || 'Gerente General';
     const displayRole = state.session.role || 'Director Ejecutivo';
     const isSuperAdmin = state.session.isSuperAdmin === true;
     const isSeller = isUserSeller();
+    const isClinical = isUserClinical();
     
     document.getElementById('sidebarUserName').textContent = displayName;
     document.getElementById('sidebarUserRole').textContent = displayRole;
@@ -386,8 +400,15 @@ function showDashboardView() {
         } else {
           el.style.display = 'none';
         }
+      } else if (isClinical) {
+        // Laboratorio y clínica solo puede ver Atención & Pacientes ('clinical' o 'clinica')
+        if (allowedRoles.includes('clinical') || allowedRoles.includes('clinica')) {
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
       } else {
-        // Otros roles (personal clínico o directivo sin privilegios superadmin)
+        // Otros roles directivos sin privilegios superadmin
         if (allowedRoles.includes('superadmin') && !allowedRoles.includes('admin') && !allowedRoles.includes('all')) {
           el.style.display = 'none';
         } else {
@@ -404,10 +425,18 @@ function showDashboardView() {
 
     // Configurar vista inicial según el rol
     const SELLER_ALLOWED = ['sales', 'catalog', 'catalog-adult', 'inventory'];
+    const CLINICAL_ALLOWED = ['orders', 'postventa'];
+
     if (isSeller) {
       // Para vendedor limita la navegación a solo historial de ventas, catálogos e inventario local
       if (!SELLER_ALLOWED.includes(state.currentCategory)) {
         state.currentCategory = 'sales';
+      }
+      switchCategory(state.currentCategory);
+    } else if (isClinical) {
+      // Para laboratorio y clínica limita a solo atención y pacientes (órdenes y seguimiento postventa)
+      if (!CLINICAL_ALLOWED.includes(state.currentCategory)) {
+        state.currentCategory = 'orders';
       }
       switchCategory(state.currentCategory);
     } else {
@@ -462,7 +491,9 @@ function closeMobileSidebar() {
 
 window.switchCategory = function(categoryId) {
   const isSeller = isUserSeller();
+  const isClinical = isUserClinical();
   const SELLER_ALLOWED = ['sales', 'catalog', 'catalog-adult', 'inventory'];
+  const CLINICAL_ALLOWED = ['orders', 'postventa'];
 
   // Para vendedor limita las cosas que puede ver a solo historial de ventas, catálogos (niños y adultos) y al inventario local
   if (isSeller && !SELLER_ALLOWED.includes(categoryId)) {
@@ -470,6 +501,14 @@ window.switchCategory = function(categoryId) {
       showToast('⚠️ Vista restringida: Tu perfil solo tiene acceso a Ventas, Catálogos e Inventario.');
     }
     categoryId = 'sales';
+  }
+
+  // Para laboratorio y clínica limita a solo atención y pacientes (órdenes y postventa)
+  if (isClinical && !CLINICAL_ALLOWED.includes(categoryId)) {
+    if (typeof showToast === 'function') {
+      showToast('⚠️ Vista restringida: Tu perfil solo tiene acceso a Atención & Pacientes (Órdenes y Postventa).');
+    }
+    categoryId = 'orders';
   }
 
   state.currentCategory = categoryId;
