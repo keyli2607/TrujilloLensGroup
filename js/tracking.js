@@ -219,33 +219,60 @@ function persistOrdersData(ordersObject) {
 }
 
 async function loadServerOrders() {
-  if (typeof window === 'undefined' || !window.fetch) return;
+  if (typeof window === 'undefined') return;
 
-  try {
-    const response = await fetch(ORDERS_API_URL, { cache: 'no-store' });
-    if (!response.ok) return;
-    const serverOrders = await response.json();
-    if (!serverOrders || typeof serverOrders !== 'object') return;
-    persistOrdersData({ ...getOrdersData(), ...serverOrders });
-  } catch (error) {
-    console.warn('No se pudo sincronizar los pedidos con el servidor.', error);
+  // 1. Sincronización directa con Supabase en tiempo real
+  if (window.LG?.supabase?.getOrders) {
+    try {
+      const supaOrders = await window.LG.supabase.getOrders();
+      if (supaOrders && Object.keys(supaOrders).length > 0) {
+        const merged = { ...getOrdersData(), ...supaOrders };
+        persistOrdersData(merged);
+        return;
+      }
+    } catch (err) {
+      console.warn('Aviso: no se pudo sincronizar con Supabase:', err);
+    }
+  }
+
+  // 2. Fallback a endpoint local si existe servidor activo
+  if (window.fetch) {
+    try {
+      const response = await fetch(ORDERS_API_URL, { cache: 'no-store' });
+      if (!response.ok) return;
+      const serverOrders = await response.json();
+      if (!serverOrders || typeof serverOrders !== 'object') return;
+      persistOrdersData({ ...getOrdersData(), ...serverOrders });
+    } catch (error) {
+      // Silencioso: en páginas estáticas usa la base local/supabase
+    }
   }
 }
 
 async function saveOrderToServer(order) {
-  if (!order || typeof window === 'undefined' || !window.fetch) return false;
+  if (!order || typeof window === 'undefined') return false;
 
-  try {
-    const response = await fetch(ORDERS_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(order)
-    });
-    return response.ok;
-  } catch (error) {
-    console.warn('No se pudo guardar el pedido en el servidor.', error);
-    return false;
+  // 1. Guardar o actualizar directamente en Supabase
+  if (window.LG?.supabase?.updateOrderStatus) {
+    try {
+      await window.LG.supabase.updateOrderStatus(order.code, order.estado, order.urgente);
+    } catch (err) {
+      console.warn('Error guardando orden en Supabase:', err);
+    }
   }
+
+  // 2. Intentar endpoint secundario
+  if (window.fetch) {
+    try {
+      await fetch(ORDERS_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+    } catch (error) {}
+  }
+
+  return true;
 }
 
 function ensureOrdersPersisted() {
@@ -676,7 +703,7 @@ function updateOrderStep(code, delta) {
   }
 }
 
-function executeSearch(rawCode) {
+async function executeSearch(rawCode) {
   const resultContainer = document.getElementById('trackingResultArea');
   const errorContainer = document.getElementById('trackingErrorArea');
   const input = document.getElementById('trackingCodeInput');
@@ -689,8 +716,23 @@ function executeSearch(rawCode) {
   // Normalizar código
   const normalized = normalizeTrackingCode(rawCode);
 
-  // Buscar en la base completa de datos, incluyendo pedidos creados por el optometrista.
-  const order = getOrdersData()[normalized];
+  // 1. Buscar en la base local primero
+  let order = getOrdersData()[normalized];
+
+  // 2. Si no se encuentra, consultar directamente a Supabase en tiempo real
+  if (!order && window.LG?.supabase?.getOrderByCode) {
+    try {
+      const supaOrder = await window.LG.supabase.getOrderByCode(normalized);
+      if (supaOrder) {
+        order = normalizeOrder(supaOrder);
+        const currentOrders = getOrdersData();
+        currentOrders[normalized] = order;
+        persistOrdersData(currentOrders);
+      }
+    } catch (err) {
+      console.warn('Error consultando Supabase en búsqueda:', err);
+    }
+  }
 
   if (order) {
     // Ocultar error

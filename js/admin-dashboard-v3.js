@@ -260,7 +260,7 @@ function showDashboardView() {
     
     // Renderizar usuarios
     if (isSuperAdmin) {
-      renderUsersTable();
+      renderUsers();
     }
   }
 }
@@ -328,6 +328,8 @@ window.switchCategory = function(categoryId) {
     renderCatalog();
   } else if (categoryId === 'catalog-adult') {
     renderAdultCatalog();
+  } else if (categoryId === 'users') {
+    renderUsers();
   }
 
   // Actualizar Breadcrumb
@@ -1361,12 +1363,22 @@ window.updateOrderStatus = async function(code, newEstado) {
   state.orders[code] = { ...state.orders[code], ...updatedFields };
 
   try {
-    await fetch(API_ORDERS_URL, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, ...updatedFields })
-    });
-  } catch (err) {}
+    if (window.LG?.supabase?.updateOrderStatus) {
+      await window.LG.supabase.updateOrderStatus(code, newEstado, state.orders[code]?.urgente);
+    } else {
+      await fetch(`${SUPABASE_URL}/rest/v1/ordenes_laboratorio?numero_ticket=eq.${encodeURIComponent(code)}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ estado: newEstado })
+      });
+    }
+  } catch (err) {
+    console.warn('Error actualizando orden en Supabase:', err);
+  }
 
   updateMetricsAndDecisions();
   renderOrdersTable();
@@ -1424,12 +1436,22 @@ async function handleCreateOrder(e) {
   state.orders[code] = newOrder;
 
   try {
-    await fetch(API_ORDERS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newOrder)
-    });
-  } catch (err) {}
+    if (window.LG?.supabase?.createOrder) {
+      await window.LG.supabase.createOrder(newOrder);
+    } else {
+      await fetch(API_ORDERS_URL, {
+        method: 'POST',
+        headers: { 
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify(newOrder)
+      });
+    }
+  } catch (err) {
+    console.warn('Error guardando en Supabase:', err);
+  }
 
   document.getElementById('modalNewOrder').classList.remove('active');
   document.getElementById('formNewOrder').reset();
@@ -1910,6 +1932,92 @@ function exportOrdersToCsv() {
   URL.revokeObjectURL(url);
   showToast('Reporte ejecutivo CSV descargado con éxito');
 }
+
+// ==========================================================================
+// 11. GESTIÓN DE USUARIOS Y SUCURSALES (SUPER ADMIN CON SUPABASE)
+// ==========================================================================
+window.openUserModal = function() {
+  document.getElementById('modalNewUser')?.classList.add('active');
+};
+
+window.closeUserModal = function() {
+  document.getElementById('modalNewUser')?.classList.remove('active');
+};
+
+async function renderUsers() {
+  const tbody = document.getElementById('usersTableBody');
+  if (!tbody) return;
+
+  tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">Cargando usuarios desde Supabase...</td></tr>`;
+
+  try {
+    let users = null;
+    if (window.LG?.supabase?.getUsers) {
+      users = await window.LG.supabase.getUsers();
+    } else {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/usuarios?select=*`, {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`
+        }
+      });
+      if (res.ok) users = await res.json();
+    }
+
+    if (!users || users.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">No se encontraron usuarios en Supabase.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+      <tr>
+        <td><strong>${u.nombres || ''} ${u.apellidos || ''}</strong></td>
+        <td><code>${u.dni}</code></td>
+        <td><span class="stock-pill stock-good">${u.rol || 'Staff'}</span></td>
+        <td>Galería San Antonio, Jr. Gamarra N° 778</td>
+        <td><span class="badge-status badge-listo">${u.activo !== false ? 'Activo' : 'Inactivo'}</span></td>
+        <td style="text-align: right;">
+          <span style="font-size: 0.8rem; color: var(--admin-text-dim);">Registrado</span>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 2rem; color: #ef4444;">Error consultando usuarios en Supabase.</td></tr>`;
+  }
+}
+
+document.getElementById('formNewUser')?.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const fullName = document.getElementById('newUserName').value.trim();
+  const [nombres, ...rest] = fullName.split(' ');
+  const apellidos = rest.join(' ') || ' ';
+  const dni = document.getElementById('newUserUsername').value.trim();
+  const pin = document.getElementById('newUserPassword').value.trim();
+  const rol = document.getElementById('newUserRole').value;
+
+  try {
+    if (window.LG?.supabase?.createUser) {
+      await window.LG.supabase.createUser({ nombres, apellidos, dni, pin, rol });
+    } else {
+      await fetch(`${SUPABASE_URL}/rest/v1/usuarios`, {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nombres, apellidos, dni, pin, rol })
+      });
+    }
+
+    showToast(`Usuario ${dni} creado con éxito en Supabase`);
+    closeUserModal();
+    document.getElementById('formNewUser').reset();
+    renderUsers();
+  } catch (err) {
+    showToast(`Error al guardar en Supabase: ${err.message}`);
+  }
+});
 
 // Toast
 function showToast(msg) {

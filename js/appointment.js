@@ -38,6 +38,12 @@ function setupAppointmentForm() {
       (notes ? `📝 *Observaciones:* ${notes}\n\n` : `\n`) +
       `¿Podrían confirmarme la disponibilidad en su sede de Trujillo? ¡Muchas gracias!`;
 
+    // Registrar prospecto / cita en Supabase
+    if (window.LG?.supabase?.registerAppointment) {
+      window.LG.supabase.registerAppointment({ name, phone, service, date, time, notes })
+        .catch(err => console.warn('Supabase appointment error:', err));
+    }
+
     const whatsappUrl = `https://wa.me/51958169535?text=${encodeURIComponent(message)}`;
 
     // Show visual confirmation
