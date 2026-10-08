@@ -4,8 +4,13 @@
    ========================================================================== */
 
 const ADMIN_STORAGE_KEY = 'lens_group_admin_session';
-const API_ORDERS_URL = '/api/orders';
-const API_LOGIN_URL = '/api/admin/login';
+
+const SUPABASE_URL = 'https://rsjondlejagmnjrmbolf.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_A86Q2r3lrF6z14HunWuuwQ_Y-G8ziVV';
+
+// Ya no usamos las rutas locales /api porque en GitHub Pages no hay servidor Node
+const API_ORDERS_URL = `${SUPABASE_URL}/rest/v1/ordenes_laboratorio?select=*,ventas(*)`;
+const API_LOGIN_URL = `${SUPABASE_URL}/rest/v1/usuarios`;
 
 // Base de datos de inventario
 const INVENTORY_DB = [
@@ -841,23 +846,61 @@ async function handleLogin(e) {
   const u = document.getElementById('adminUsername').value.trim();
   const p = document.getElementById('adminPassword').value.trim();
 
+  // Acceso de Super Admin (sin pasar por base de datos)
+  if (u.toLowerCase() === 'keyli' && p === '2607') {
+    state.session = {
+      name: 'Super Admin',
+      role: 'Acceso Total',
+      branch: 'Todas las Sedes',
+      isSuperAdmin: true
+    };
+    localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(state.session));
+    showDashboardView();
+    loadOrders();
+    showToast(`¡Bienvenido ${state.session.name}!`);
+    return;
+  }
+
   try {
-    const res = await fetch(API_LOGIN_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: u, password: p })
+    const res = await fetch(`${API_LOGIN_URL}?select=*&dni=eq.${u}&pin=eq.${p}&limit=1`, {
+      method: 'GET',
+      headers: { 
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json' 
+      }
     });
     
     if (res.ok) {
-      const data = await res.json();
-      state.session = data.user;
-      localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(state.session));
-      showDashboardView();
-      loadOrders();
-      showToast(`¡Bienvenido ${state.session.name}!`);
+      const users = await res.json();
+      if (users.length > 0) {
+        const user = users[0];
+        state.session = {
+          name: `${user.nombres} ${user.apellidos}`,
+          role: user.rol,
+          branch: 'Sucursal Principal'
+        };
+        localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(state.session));
+        showDashboardView();
+        loadOrders();
+        showToast(`¡Bienvenido ${state.session.name}!`);
+        return;
+      } else {
+        errorEl.textContent = 'Usuario o contraseña incorrecta.';
+        errorEl.style.display = 'block';
+        return;
+      }
+    } else {
+      const errData = await res.json().catch(()=>({}));
+      errorEl.textContent = `Error de conexión a la base de datos.`;
+      errorEl.style.display = 'block';
       return;
     }
-  } catch (err) {}
+  } catch (err) {
+      errorEl.textContent = `Error de red: Verifica tu conexión.`;
+      errorEl.style.display = 'block';
+      return;
+  }
 
   // Fallback client-side auth
   if (u.toLowerCase() === 'keyli' && p === '2607') {
@@ -1147,14 +1190,28 @@ function handleLogout() {
 // ==========================================================================
 async function loadOrders() {
   try {
-    const res = await fetch(API_ORDERS_URL);
-    if (res.ok) {
-      const data = await res.json();
-      if (data && Object.keys(data).length > 0) {
-        state.orders = data;
-      } else {
-        state.orders = DEFAULT_ORDERS;
+    const res = await fetch(API_ORDERS_URL, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
       }
+    });
+    if (res.ok) {
+      const ordenes = await res.json();
+      const mapOrders = {};
+      (ordenes || []).forEach(o => {
+        mapOrders[o.numero_ticket] = {
+          code: o.numero_ticket,
+          estado: o.estado,
+          urgente: o.urgente,
+          service: o.ventas?.montura_descripcion || 'Montura',
+          treatment: o.ventas?.luna_descripcion || 'Cristales',
+          price: 0,
+          cost: 0,
+          currentStep: o.estado === 'Entregado' ? 5 : o.estado === 'Listo para Recojo' ? 4 : o.estado === 'En Proceso' ? 2 : 1
+        };
+      });
+      state.orders = mapOrders;
     } else {
       state.orders = DEFAULT_ORDERS;
     }

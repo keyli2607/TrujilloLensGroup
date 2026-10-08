@@ -3,7 +3,37 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const PORT = 8080;
-const ORDERS_FILE = path.join(process.cwd(), 'orders.json');
+const ENV_FILE = path.join(process.cwd(), 'nextjs-app', '.env.local');
+
+let SUPABASE_URL = '';
+let SUPABASE_KEY = '';
+
+try {
+  const envContent = fs.readFileSync(ENV_FILE, 'utf8');
+  envContent.split('\n').forEach(line => {
+    if (line.startsWith('NEXT_PUBLIC_SUPABASE_URL=')) SUPABASE_URL = line.split('=')[1].trim();
+    if (line.startsWith('SUPABASE_SERVICE_ROLE_KEY=')) SUPABASE_KEY = line.split('=')[1].trim();
+  });
+} catch (e) {
+  console.log("Asegúrate de configurar nextjs-app/.env.local");
+}
+
+async function supabaseRequest(endpoint, options = {}) {
+  const url = new URL(`/rest/v1/${endpoint}`, SUPABASE_URL);
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': options.method === 'POST' || options.method === 'PATCH' ? 'return=representation' : '',
+      ...(options.headers || {})
+    }
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.message || 'Error en Supabase');
+  return data;
+}
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -17,17 +47,7 @@ const MIME_TYPES = {
   '.webp': 'image/webp'
 };
 
-function readOrders() {
-  try {
-    return JSON.parse(fs.readFileSync(ORDERS_FILE, 'utf8'));
-  } catch (error) {
-    return {};
-  }
-}
-
-function writeOrders(orders) {
-  fs.writeFileSync(ORDERS_FILE, JSON.stringify(orders, null, 2));
-}
+// Funciones locales eliminadas en favor de supabaseRequest
 
 function sendJson(res, statusCode, data) {
   res.writeHead(statusCode, {
@@ -56,48 +76,93 @@ const server = http.createServer((req, res) => {
   if (requestUrl.pathname === '/api/admin/login') {
     if (req.method === 'OPTIONS') return sendJson(res, 204, {});
     if (req.method === 'POST') {
-      readRequestBody(req).then((creds) => {
+      readRequestBody(req).then(async (creds) => {
         const u = String(creds.username || creds.dni || '').trim().toLowerCase();
         const p = String(creds.password || creds.pin || '').trim();
-        if ((u === 'admin' || u === 'optometrista' || u === '12345678') && (p === 'lensgroup2026' || p === '2026' || p === 'admin')) {
-          return sendJson(res, 200, {
-            success: true,
-            user: {
-              name: u === 'admin' ? 'Gerencia General' : 'Dr. Optómetra Trujillo',
-              role: u === 'admin' ? 'Director Ejecutivo' : 'Especialista en Refracción',
-              branch: 'Galería San Antonio, Jr. Gamarra N° 778'
-            }
-          });
+
+        try {
+          const users = await supabaseRequest(`usuarios?select=*&dni=eq.${u}&pin=eq.${p}&limit=1`);
+          if (users && users.length > 0) {
+            const user = users[0];
+            return sendJson(res, 200, {
+              success: true,
+              user: {
+                name: `${user.nombres} ${user.apellidos}`,
+                role: user.rol,
+                branch: 'Sucursal Principal'
+              }
+            });
+          }
+        } catch (e) {
+          console.error('Error in login logic:', e);
         }
-        return sendJson(res, 401, { error: 'Credenciales inválidas. Usa el usuario demo o tu PIN autorizado.' });
-      }).catch(() => sendJson(res, 400, { error: 'Formato inválido.' }));
+
+        return sendJson(res, 401, { error: 'Credenciales inválidas en Supabase.' });
+      }).catch((e) => {
+        console.error('Catch-all error:', e);
+        sendJson(res, 400, { error: 'Formato inválido o error interno.' });
+      });
       return;
     }
   }
 
   if (requestUrl.pathname === '/api/orders' || requestUrl.pathname.startsWith('/api/orders/')) {
     if (req.method === 'OPTIONS') return sendJson(res, 204, {});
-    if (req.method === 'GET') return sendJson(res, 200, readOrders());
+    if (req.method === 'GET') {
+      supabaseRequest('ordenes_laboratorio?select=*,ventas(*)').then(ordenes => {
+        // Transformar al formato que espera el frontend actual
+        const mapOrders = {};
+        (ordenes || []).forEach(o => {
+          mapOrders[o.numero_ticket] = {
+            code: o.numero_ticket,
+            estado: o.estado,
+            urgente: o.urgente,
+            service: o.ventas?.montura_descripcion || '',
+            treatment: o.ventas?.luna_descripcion || '',
+            price: 0,
+            cost: 0,
+            currentStep: o.estado === 'Entregado' ? 5 : o.estado === 'Listo para Recojo' ? 4 : o.estado === 'En Proceso' ? 2 : 1
+          };
+        });
+        sendJson(res, 200, mapOrders);
+      }).catch(e => sendJson(res, 500, { error: e.message }));
+      return;
+    }
 
     if (req.method === 'PATCH' || req.method === 'PUT') {
-      readRequestBody(req).then((data) => {
+      readRequestBody(req).then(async (data) => {
         const code = data.code || requestUrl.pathname.replace('/api/orders/', '').trim();
         if (!code) return sendJson(res, 400, { error: 'Se requiere código de orden.' });
-        const orders = readOrders();
-        if (!orders[code]) return sendJson(res, 404, { error: 'Orden no encontrada.' });
-        orders[code] = { ...orders[code], ...data };
-        writeOrders(orders);
-        return sendJson(res, 200, orders[code]);
+        
+        try {
+           const updateData = {
+              estado: data.estado || 'En Proceso',
+              urgente: data.urgente || false
+           };
+           const result = await supabaseRequest(`ordenes_laboratorio?numero_ticket=eq.${code}`, {
+              method: 'PATCH',
+              body: JSON.stringify(updateData)
+           });
+           return sendJson(res, 200, result?.[0] || data);
+        } catch(e) {
+           return sendJson(res, 500, { error: e.message });
+        }
       }).catch(() => sendJson(res, 400, { error: 'Error procesando datos.' }));
       return;
     }
 
-    readRequestBody(req).then((order) => {
+    readRequestBody(req).then(async (order) => {
       if (!order.code) return sendJson(res, 400, { error: 'El pedido necesita un código.' });
-      const orders = readOrders();
-      orders[order.code] = order;
-      writeOrders(orders);
-      sendJson(res, 200, order);
+      try {
+         // Esta es una creación básica simplificada, en el sistema completo usarías el ImportOrders
+         await supabaseRequest('ordenes_laboratorio', {
+            method: 'POST',
+            body: JSON.stringify({ numero_ticket: order.code, estado: order.estado || 'En Cola' })
+         });
+         sendJson(res, 200, order);
+      } catch(e) {
+         sendJson(res, 500, { error: e.message });
+      }
     }).catch(() => sendJson(res, 400, { error: 'Datos de pedido inválidos.' }));
     return;
   }
