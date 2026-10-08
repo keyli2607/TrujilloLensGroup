@@ -70,7 +70,7 @@ export default function Footer() {
           <div className="footer-col">
             <h4 className="footer-title">Información Legal</h4>
             <ul className="footer-links">
-              <li><Link href="/#contacto">RUC: 20608542191</Link></li>
+              <li><Link href="/#contacto">RUC: 20609502623</Link></li>
               <li><Link href="/#contacto">Políticas de Garantía Oficial</Link></li>
               <li><Link href="/#contacto">Términos y Condiciones</Link></li>
               <li><Link href="/#contacto">Protección de Datos Personales</Link></li>

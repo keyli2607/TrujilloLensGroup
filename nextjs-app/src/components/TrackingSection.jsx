@@ -232,15 +232,15 @@ export default function TrackingSection() {
                 {/* Datos Principales de la Orden */}
                 <div className="tracking-meta-grid">
                   <div className="meta-item">
-                    <span className="meta-label">👤 Cliente Titular</span>
+                    <span className="meta-label">Cliente Titular</span>
                     <span className="meta-value">{orderResult.customer}</span>
                   </div>
                   <div className="meta-item">
-                    <span className="meta-label">📅 Fecha de Recepción</span>
+                    <span className="meta-label">Fecha de Recepción</span>
                     <span className="meta-value">{orderResult.receivedDate}</span>
                   </div>
                   <div className="meta-item">
-                    <span className="meta-label">⏱️ Entrega Estimada</span>
+                    <span className="meta-label">⏱Entrega Estimada</span>
                     <span className="meta-value meta-value-highlight">{orderResult.estimatedDate}</span>
                   </div>
                   <div className="meta-item" style={{ gridColumn: "1 / -1" }}>
@@ -250,7 +250,7 @@ export default function TrackingSection() {
                     </span>
                   </div>
                   <div className="meta-item" style={{ gridColumn: "1 / -1" }}>
-                    <span className="meta-label">📍 Sede de Entrega en Trujillo</span>
+                    <span className="meta-label">📍Sede de Entrega en Trujillo</span>
                     <span className="meta-value" style={{ fontSize: "0.95rem", fontWeight: 600, color: "var(--color-dark-700)" }}>
                       {orderResult.branch} (Horario: Lun-Sáb 9am–9pm / Dom 9:30am–2pm)
                     </span>
@@ -475,7 +475,7 @@ export default function TrackingSection() {
                 <br />
                 Lun–Sáb: 9:00 a.m.–9:00 p.m. &nbsp;|&nbsp; Dom: 9:30 a.m.–2:00 p.m.
                 <br />
-                Trae tu DNI o boleta. Ajuste facial gratuito.
+                Trae tu DNI o boleta.
               </div>
             </div>
           </div>
