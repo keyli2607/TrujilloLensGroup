@@ -82,46 +82,48 @@
         </div>
 
         <nav class="sidebar-nav">
-          <div class="sidebar-section-label" data-roles="superadmin">Administración Global (Super Admin)</div>
+          <!-- 1. OPERACIONES COMERCIALES (Accesible para Vendedor y Admin) -->
+          <div class="sidebar-section-label" data-roles="seller,admin,superadmin">Ventas &amp; Catálogos</div>
 
-          <button type="button" class="sidebar-nav-btn" data-view="users" data-roles="superadmin">
-            <div class="nav-btn-content">
-              ${LG.icon('users', { size: 18, sw: 2 })}
-              <span>Usuarios & Sucursales</span>
-            </div>
-          </button>
-
-          <button type="button" class="sidebar-nav-btn" data-view="catalog" data-roles="superadmin">
-            <div class="nav-btn-content">
-              ${LG.icon('layers', { size: 18, sw: 2 })}
-              <span>Catálogo de Niños</span>
-            </div>
-          </button>
-
-          <button type="button" class="sidebar-nav-btn" data-view="catalog-adult" data-roles="superadmin">
-            <div class="nav-btn-content">
-              ${LG.icon('tv', { size: 18, sw: 2 })}
-              <span>Catálogo de Adultos</span>
-            </div>
-          </button>
-
-          <button type="button" class="sidebar-nav-btn" data-view="sales" data-roles="superadmin">
+          <button type="button" class="sidebar-nav-btn" data-view="sales" data-roles="seller,admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('trendingUp', { size: 18, sw: 2 })}
               <span>Historial de Ventas</span>
             </div>
           </button>
 
-          <div class="sidebar-section-label" data-roles="all" style="margin-top: 0.5rem;">Gestión Estratégica</div>
+          <button type="button" class="sidebar-nav-btn" data-view="catalog" data-roles="seller,admin,superadmin">
+            <div class="nav-btn-content">
+              ${LG.icon('layers', { size: 18, sw: 2 })}
+              <span>Catálogo de Niños</span>
+            </div>
+          </button>
 
-          <button type="button" class="sidebar-nav-btn active" data-view="overview" data-roles="all">
+          <button type="button" class="sidebar-nav-btn" data-view="catalog-adult" data-roles="seller,admin,superadmin">
+            <div class="nav-btn-content">
+              ${LG.icon('tv', { size: 18, sw: 2 })}
+              <span>Catálogo de Adultos</span>
+            </div>
+          </button>
+
+          <button type="button" class="sidebar-nav-btn" data-view="inventory" data-roles="seller,admin,superadmin">
+            <div class="nav-btn-content">
+              ${LG.icon('box3d', { size: 18, sw: 2 })}
+              <span>Inventario Local</span>
+            </div>
+          </button>
+
+          <!-- 2. GESTIÓN ESTRATÉGICA & BI (Solo Administrador / Gerencia) -->
+          <div class="sidebar-section-label" data-roles="admin,superadmin" style="margin-top: 0.5rem;">Gestión Estratégica</div>
+
+          <button type="button" class="sidebar-nav-btn" data-view="overview" data-roles="admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('dashboard', { size: 18, sw: 2 })}
               <span>Visión General</span>
             </div>
           </button>
 
-          <button type="button" class="sidebar-nav-btn" data-view="decisions" data-roles="superadmin">
+          <button type="button" class="sidebar-nav-btn" data-view="decisions" data-roles="admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('sparkle', { size: 18, sw: 2 })}
               <span>Toma de Decisiones</span>
@@ -129,48 +131,52 @@
             <span class="nav-badge-pill nav-badge-alert" id="sidebarDecisionsBadge">4 Activas</span>
           </button>
 
-          <button type="button" class="sidebar-nav-btn" data-view="analytics" data-roles="superadmin">
+          <button type="button" class="sidebar-nav-btn" data-view="analytics" data-roles="admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('barChart', { size: 18, sw: 2 })}
-              <span>Gráficos & Analítica Global</span>
+              <span>Gráficos &amp; Analítica Global</span>
             </div>
           </button>
 
-          <button type="button" class="sidebar-nav-btn" data-view="simulator" data-roles="superadmin">
+          <button type="button" class="sidebar-nav-btn" data-view="simulator" data-roles="admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('layersPoly', { size: 18, sw: 2 })}
               <span>Simulador What-If</span>
             </div>
           </button>
 
-          <div class="sidebar-section-label" data-roles="all" style="margin-top: 0.5rem;">Operaciones de Sede</div>
+          <!-- 3. OPERACIONES DE SEDE Y PACIENTES (Admin / Clínica) -->
+          <div class="sidebar-section-label" data-roles="admin,superadmin" style="margin-top: 0.5rem;">Atención &amp; Pacientes</div>
 
-          <button type="button" class="sidebar-nav-btn" data-view="orders" data-roles="all">
+          <button type="button" class="sidebar-nav-btn" data-view="orders" data-roles="admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('fileText', { size: 18, sw: 2 })}
-              <span>Pacientes & Órdenes</span>
+              <span>Pacientes &amp; Órdenes</span>
             </div>
             <span class="nav-badge-pill" id="sidebarOrdersBadge">8</span>
           </button>
 
-          <button type="button" class="sidebar-nav-btn" data-view="inventory" data-roles="all">
-            <div class="nav-btn-content">
-              ${LG.icon('box3d', { size: 18, sw: 2 })}
-              <span>Inventario Local</span>
-            </div>
-          </button>
-
-          <button type="button" class="sidebar-nav-btn" data-view="postventa" data-roles="all">
+          <button type="button" class="sidebar-nav-btn" data-view="postventa" data-roles="admin,superadmin">
             <div class="nav-btn-content">
               ${LG.icon('checkCircle', { size: 18, sw: 2 })}
               <span>Seguimiento Postventa</span>
             </div>
           </button>
 
+          <!-- 4. ADMINISTRACIÓN GLOBAL (Super Admin) -->
+          <div class="sidebar-section-label" data-roles="superadmin" style="margin-top: 0.5rem;">Administración Global</div>
+
+          <button type="button" class="sidebar-nav-btn" data-view="users" data-roles="superadmin">
+            <div class="nav-btn-content">
+              ${LG.icon('users', { size: 18, sw: 2 })}
+              <span>Usuarios &amp; Sucursales</span>
+            </div>
+          </button>
+
           <button type="button" class="sidebar-nav-btn" data-view="audit" data-roles="superadmin">
             <div class="nav-btn-content">
               ${LG.icon('shield', { size: 18, sw: 2 })}
-              <span>Auditoría & Backups</span>
+              <span>Auditoría &amp; Backups</span>
             </div>
           </button>
         </nav>
@@ -574,7 +580,7 @@
               <p>Control de existencias de monturas, lunas y tratamientos para prevenir quiebres de stock.</p>
             </div>
             <div style="display: flex; gap: 0.6rem;">
-              <button type="button" class="btn-primary-action" onclick="openInventoryModal()">
+              <button type="button" class="btn-primary-action" onclick="openInventoryModal()" data-roles="admin,superadmin">
                 ${LG.icon('plus', { size: 16, sw: 2.5 })}
                 <span>Nuevo Producto</span>
               </button>
@@ -594,7 +600,7 @@
               <h2>Gestión de Usuarios y Sucursales</h2>
               <p>Crear, editar y desactivar personal (administradores locales, optómetras, vendedores). Control total multi-sede.</p>
             </div>
-            <button type="button" class="btn-primary-action" onclick="openUserModal()">
+            <button type="button" class="btn-primary-action" onclick="openUserModal()" data-roles="superadmin">
               <span>+ Nuevo Usuario</span>
             </button>
           </div>
@@ -624,7 +630,7 @@
                 ${LG.icon('refresh', { size: 15, sw: 2 })}
                 <span>Actualizar Stock</span>
               </button>
-              <button type="button" class="btn-primary-action" onclick="openInventoryModal()">
+              <button type="button" class="btn-primary-action" onclick="openInventoryModal()" data-roles="admin,superadmin">
                 ${LG.icon('plus', { size: 14, sw: 2.5 })}
                 <span>Agregar Stock</span>
               </button>
@@ -656,7 +662,7 @@
                 ${LG.icon('refresh', { size: 15, sw: 2 })}
                 <span>Actualizar Stock</span>
               </button>
-              <button type="button" class="btn-primary-action" onclick="openInventoryModal()">
+              <button type="button" class="btn-primary-action" onclick="openInventoryModal()" data-roles="admin,superadmin">
                 ${LG.icon('plus', { size: 14, sw: 2.5 })}
                 <span>Agregar Stock</span>
               </button>

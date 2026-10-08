@@ -338,6 +338,21 @@ function initAuth() {
   showLoginView();
 }
 
+function isUserSeller() {
+  if (!state.session) return false;
+  if (state.session.isSuperAdmin === true) return false;
+  const role = String(state.session.role || '').toLowerCase().trim();
+  if (role.includes('vent') || role.includes('vendedor') || role.includes('seller') || role.includes('comercial')) {
+    return true;
+  }
+  const isManagementOrClinical = role.includes('admin') || role.includes('geren') || role.includes('direc') || 
+                                 role.includes('optom') || role.includes('laborat') || role.includes('jefe');
+  if (!isManagementOrClinical) {
+    return true;
+  }
+  return false;
+}
+
 function showLoginView() {
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('dashboardScreen').style.display = 'none';
@@ -351,28 +366,58 @@ function showDashboardView() {
     const displayName = state.session.name || 'Gerente General';
     const displayRole = state.session.role || 'Director Ejecutivo';
     const isSuperAdmin = state.session.isSuperAdmin === true;
+    const isSeller = isUserSeller();
     
     document.getElementById('sidebarUserName').textContent = displayName;
     document.getElementById('sidebarUserRole').textContent = displayRole;
     document.getElementById('sidebarUserAvatar').textContent = displayName.charAt(0).toUpperCase();
 
-    // Filtro de roles en el Sidebar
-    document.querySelectorAll('[data-roles="superadmin"]').forEach(el => {
+    // Filtro de roles en el Sidebar y elementos de la interfaz
+    document.querySelectorAll('[data-roles]').forEach(el => {
+      const allowedRoles = (el.dataset.roles || '').split(',').map(r => r.trim().toLowerCase());
+      
       if (isSuperAdmin) {
+        // Superadmin tiene acceso a todas las secciones
         el.style.display = '';
+      } else if (isSeller) {
+        // Vendedor solo puede ver elementos marcados con 'seller' o 'vendedor'
+        if (allowedRoles.includes('seller') || allowedRoles.includes('vendedor')) {
+          el.style.display = '';
+        } else {
+          el.style.display = 'none';
+        }
       } else {
-        el.style.display = 'none';
+        // Otros roles (personal clínico o directivo sin privilegios superadmin)
+        if (allowedRoles.includes('superadmin') && !allowedRoles.includes('admin') && !allowedRoles.includes('all')) {
+          el.style.display = 'none';
+        } else {
+          el.style.display = '';
+        }
       }
     });
 
-    // Cambiar vista inicial dependiendo del rol
-    if (!isSuperAdmin && ['users', 'catalog', 'sales', 'decisions', 'analytics', 'simulator', 'audit'].includes(state.currentCategory)) {
-      switchCategory('overview');
+    // Chatbot de soporte IA: reservado para administradores
+    const chatbotBtn = document.getElementById('chatbotBtn');
+    if (chatbotBtn) {
+      chatbotBtn.style.display = (isSuperAdmin) ? '' : 'none';
     }
-    
-    // Renderizar usuarios
-    if (isSuperAdmin) {
-      renderUsers();
+
+    // Configurar vista inicial según el rol
+    const SELLER_ALLOWED = ['sales', 'catalog', 'catalog-adult', 'inventory'];
+    if (isSeller) {
+      // Para vendedor limita la navegación a solo historial de ventas, catálogos e inventario local
+      if (!SELLER_ALLOWED.includes(state.currentCategory)) {
+        state.currentCategory = 'sales';
+      }
+      switchCategory(state.currentCategory);
+    } else {
+      if (!isSuperAdmin && ['users', 'audit'].includes(state.currentCategory)) {
+        state.currentCategory = 'overview';
+      }
+      switchCategory(state.currentCategory || 'overview');
+      if (isSuperAdmin) {
+        renderUsers();
+      }
     }
   }
 }
@@ -416,6 +461,17 @@ function closeMobileSidebar() {
 }
 
 window.switchCategory = function(categoryId) {
+  const isSeller = isUserSeller();
+  const SELLER_ALLOWED = ['sales', 'catalog', 'catalog-adult', 'inventory'];
+
+  // Para vendedor limita las cosas que puede ver a solo historial de ventas, catálogos (niños y adultos) y al inventario local
+  if (isSeller && !SELLER_ALLOWED.includes(categoryId)) {
+    if (typeof showToast === 'function') {
+      showToast('⚠️ Vista restringida: Tu perfil solo tiene acceso a Ventas, Catálogos e Inventario.');
+    }
+    categoryId = 'sales';
+  }
+
   state.currentCategory = categoryId;
 
   // Actualizar botones del sidebar
@@ -444,12 +500,14 @@ window.switchCategory = function(categoryId) {
     renderUsers();
   } else if (categoryId === 'sales') {
     renderSales();
+  } else if (categoryId === 'inventory') {
+    renderInventory();
   }
 
   // Actualizar Breadcrumb
   const breadcrumb = document.getElementById('activeCategoryBreadcrumb');
   if (breadcrumb) {
-    breadcrumb.textContent = CATEGORY_NAMES[categoryId] || 'Visión General';
+    breadcrumb.textContent = CATEGORY_NAMES[categoryId] || 'Historial de Ventas';
   }
 
   // Si entra a la vista de analítica, visión general, o ventas, forzar re-renderizado / resize de Chart.js
@@ -854,7 +912,7 @@ function renderCatalog() {
           </div>
           <div style="display: flex; gap: 0.5rem;">
             ${btnSell}
-            <button class="btn-header-action" style="padding: 0.5rem 1rem;" onclick="showToast('Abriendo editor de producto...')">Editar</button>
+            ${!isUserSeller() ? `<button class="btn-header-action" style="padding: 0.5rem 1rem;" onclick="showToast('Abriendo editor de producto...')">Editar</button>` : ''}
           </div>
         </div>
       </div>
@@ -908,7 +966,7 @@ function renderAdultCatalog() {
           </div>
           <div style="display: flex; gap: 0.5rem;">
             ${btnSell}
-            <button class="btn-header-action" style="padding: 0.5rem 1rem;" onclick="showToast('Abriendo editor de producto...')">Editar</button>
+            ${!isUserSeller() ? `<button class="btn-header-action" style="padding: 0.5rem 1rem;" onclick="showToast('Abriendo editor de producto...')">Editar</button>` : ''}
           </div>
         </div>
       </div>
@@ -2329,20 +2387,32 @@ function renderInventory() {
             <div style="font-size: 1rem; font-weight: 700; color: #34d399;">S/ ${item.price}</div>
           </div>
         </div>
-        <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
-          <button type="button" class="btn-decision-action" style="flex: 1;" onclick="replenishStock('${item.id}')">
-            +5 uds
-          </button>
-          <button type="button" class="btn-header-action" style="flex: 1;" onclick="openInventoryModal('${item.id}')">
-            Editar
-          </button>
-        </div>
+        ${isUserSeller() ? `
+          <div style="margin-top: 0.5rem;">
+            <button type="button" class="btn-primary-action" style="width: 100%; padding: 0.5rem; font-size: 0.85rem;" onclick="startSale('${item.id}')">
+              Vender este Producto
+            </button>
+          </div>
+        ` : `
+          <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+            <button type="button" class="btn-decision-action" style="flex: 1;" onclick="replenishStock('${item.id}')">
+              +5 uds
+            </button>
+            <button type="button" class="btn-header-action" style="flex: 1;" onclick="openInventoryModal('${item.id}')">
+              Editar
+            </button>
+          </div>
+        `}
       </div>
     `;
   }).join('');
 }
 
 window.openInventoryModal = function(itemId = null) {
+  if (isUserSeller()) {
+    showToast('⚠️ Solo los administradores pueden registrar o editar productos de inventario.');
+    return;
+  }
   const modal = document.getElementById('modalInventory');
   const form = document.getElementById('formInventory');
   if (!modal || !form) return;
