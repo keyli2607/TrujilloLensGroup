@@ -55,6 +55,19 @@
               <span>Ingresar al Dashboard</span>
               ${LG.icon('arrowRight', { size: 18, sw: 2.5 })}
             </button>
+
+            <!-- Accesos rápidos de prueba -->
+            <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(13, 148, 136, 0.08); border: 1px dashed var(--admin-card-border); border-radius: 8px; font-size: 0.78rem; text-align: center; color: var(--admin-text-muted);">
+              <div style="font-weight: 700; margin-bottom: 0.4rem; color: var(--admin-primary);">🔑 Credenciales Rápidas:</div>
+              <div style="display: flex; gap: 0.4rem; justify-content: center; flex-wrap: wrap;">
+                <button type="button" class="btn-decision-action" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; cursor: pointer;" onclick="quickLogin('keyli', '2607')">
+                  keyli / 2607
+                </button>
+                <button type="button" class="btn-decision-action" style="padding: 0.25rem 0.6rem; font-size: 0.75rem; cursor: pointer;" onclick="quickLogin('admin', 'admin')">
+                  admin / admin
+                </button>
+              </div>
+            </div>
           </form>
 
           <div style="text-align: center; margin-top: 1.25rem;">
