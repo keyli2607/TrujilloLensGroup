@@ -304,27 +304,33 @@
                 <h3 style="margin: 0;">Transacciones y Comprobantes</h3>
                 <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: var(--admin-text-muted);">Registro de boletas electrónicas (B001), facturas (F001) y notas de venta.</p>
               </div>
-              <div style="display: flex; gap: 0.5rem; align-items: center;">
-                <input type="text" id="salesSearchInput" class="form-input" placeholder="Buscar por comprobante, cliente o doc..." style="font-size: 0.85rem; padding: 0.45rem 0.9rem; width: 280px;">
-                <button type="button" class="btn-primary-action" style="padding: 0.45rem 1rem; font-size: 0.85rem;" onclick="openNewSaleModal()">+ Emitir</button>
+              <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+                <input type="text" id="salesSearchInput" class="form-input" placeholder="Buscar por comprobante, cliente o doc..." style="font-size: 0.85rem; padding: 0.5rem 0.9rem; min-width: 280px;">
+                <button type="button" class="btn-primary-action" style="padding: 0.5rem 1rem; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 0.4rem; white-space: nowrap;" onclick="openNewSaleModal()">
+                  ${LG.icon('plus', { size: 15, sw: 2.5 })}
+                  <span>+ Nueva Venta</span>
+                </button>
               </div>
             </div>
-            <div class="table-responsive" style="border: none; margin-top: 0.5rem;">
+            <div class="mobile-table-hint" style="display: none; font-size: 0.72rem; color: var(--admin-text-dim); margin-top: 0.5rem; margin-bottom: 0.2rem; align-items: center; gap: 0.35rem;">
+              <span>👉</span><span>Desliza horizontalmente para ver todos los comprobantes y acciones</span>
+            </div>
+            <div class="table-responsive" style="margin-top: 0.5rem;">
               <table class="admin-table">
                 <thead>
                   <tr>
-                    <th>Comprobante</th>
-                    <th>Fecha / Hora</th>
-                    <th>Cliente / Razón Social</th>
-                    <th>DNI / RUC</th>
-                    <th>Detalle</th>
-                    <th>Total</th>
-                    <th>Estado</th>
-                    <th style="text-align: right;">Acciones</th>
+                    <th style="min-width: 140px;">Comprobante</th>
+                    <th style="min-width: 115px;">Fecha / Hora</th>
+                    <th style="min-width: 200px;">Cliente / Razón Social</th>
+                    <th style="min-width: 130px;">DNI / RUC</th>
+                    <th style="min-width: 220px;">Detalle de Venta</th>
+                    <th style="min-width: 110px;">Total</th>
+                    <th style="min-width: 100px;">Estado</th>
+                    <th style="min-width: 170px; text-align: right;">Acciones</th>
                   </tr>
                 </thead>
                 <tbody id="salesTableBody">
-                  <tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">Cargando historial de ventas...</td></tr>
+                  <tr><td colspan="8" style="text-align: center; padding: 2.5rem; color: var(--admin-text-muted);">Cargando historial de ventas...</td></tr>
                 </tbody>
               </table>
             </div>
@@ -453,24 +459,361 @@
           <div class="view-header">
             <div class="view-title-group">
               <h2>Analítica y Gráficos de Negocio</h2>
-              <p>Comportamiento de ventas, tratamientos más pedidos y cuota de marcas autorizadas.</p>
+              <p>Métricas consolidadas de ventas, estadísticas trimestrales, rendimiento en tiempo real y demanda oftálmica.</p>
+            </div>
+            <div class="analytics-tab-pills" id="analyticsNavPills">
+              <button type="button" class="analytics-pill active" data-panel-filter="all" onclick="filterAnalyticsPanel('all')">
+                ${LG.icon('chart', { size: 14, sw: 2 })}
+                <span>Todos los Paneles</span>
+              </button>
+              <button type="button" class="analytics-pill" data-panel-filter="current-month" onclick="filterAnalyticsPanel('current-month')">
+                <span class="live-pulse-dot"></span>
+                <span>Mes Actual (Marzo)</span>
+              </button>
+              <button type="button" class="analytics-pill" data-panel-filter="last-3-months" onclick="filterAnalyticsPanel('last-3-months')">
+                ${LG.icon('calendar', { size: 14, sw: 2 })}
+                <span>Últimos 3 Meses</span>
+              </button>
             </div>
           </div>
-          <div class="charts-grid">
-            <div class="chart-card col-8">
-              <div class="chart-header">
-                <div class="chart-title-wrap"><h3>Evolución de Ingresos Semanales vs Meta</h3><p>Seguimiento del presupuesto mensual en Soles (S/)</p></div>
-                <span style="font-size: 0.78rem; font-weight: 700; color: #5eead4;">+16.2% vs Feb</span>
+
+          <!-- ======================================================== -->
+          <!-- PANEL 1: ESTADÍSTICAS DEL MES ACTUAL (MARZO 2026) -->
+          <!-- ======================================================== -->
+          <div class="analytics-section-card accent-current" id="analyticsPanelCurrentMonth">
+            <div class="analytics-section-header">
+              <div class="analytics-header-left">
+                <div class="analytics-section-icon" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">
+                  ${LG.icon('zap', { size: 22, sw: 2.2 })}
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
+                    <h3 class="analytics-section-title">Estadísticas del Mes Actual (Marzo 2026)</h3>
+                    <span class="analytics-badge badge-active"><span class="live-pulse-dot"></span> En Curso &bull; Día 26 de 31</span>
+                    <span class="analytics-badge badge-target">🎯 Meta: S/ 60,000</span>
+                  </div>
+                  <p class="analytics-section-sub">Seguimiento en tiempo real de facturación acumulada, ritmo de órdenes y cumplimiento presupuestario de tienda.</p>
+                </div>
               </div>
-              <div class="chart-container-inner"><canvas id="chartRevenueTrend"></canvas></div>
+              <div class="analytics-header-right">
+                <div class="analytics-stat-pill">
+                  <span class="stat-pill-label">Cumplimiento Meta Mes</span>
+                  <strong class="stat-pill-value" style="color: #38bdf8;">91.4%</strong>
+                </div>
+              </div>
             </div>
-            <div class="chart-card col-4">
-              <div class="chart-header"><div class="chart-title-wrap"><h3>Participación por Marca</h3><p>Distribución de órdenes en tienda</p></div></div>
-              <div class="chart-container-inner"><canvas id="chartBrandShare"></canvas></div>
+
+            <!-- KPIs MES ACTUAL -->
+            <div class="analytics-kpis-grid">
+              <div class="kpi-mini-card">
+                <div class="kpi-mini-top">
+                  <span class="kpi-mini-title">Facturación Acumulada</span>
+                  <span class="kpi-mini-tag tag-success">▲ +16.2% vs Feb</span>
+                </div>
+                <div class="kpi-mini-value" style="color: #38bdf8;">S/ 54,820.00</div>
+                <div class="kpi-mini-progress">
+                  <div class="kpi-progress-bar" style="width: 91.4%; background: linear-gradient(90deg, #0ea5e9, #38bdf8);"></div>
+                </div>
+                <div class="kpi-mini-bottom">
+                  <span>Meta S/ 60,000</span>
+                  <span style="color: #38bdf8; font-weight: 600;">Faltan S/ 5,180</span>
+                </div>
+              </div>
+
+              <div class="kpi-mini-card">
+                <div class="kpi-mini-top">
+                  <span class="kpi-mini-title">Órdenes Atendidas</span>
+                  <span class="kpi-mini-tag tag-success">130 cerradas</span>
+                </div>
+                <div class="kpi-mini-value" style="color: #34d399;">130 <span style="font-size: 0.92rem; font-weight: 500; color: var(--admin-text-muted);">/ 140 meta</span></div>
+                <div class="kpi-mini-progress">
+                  <div class="kpi-progress-bar" style="width: 92.8%; background: linear-gradient(90deg, #10b981, #34d399);"></div>
+                </div>
+                <div class="kpi-mini-bottom">
+                  <span>98 Listas &bull; 20 Taller &bull; 12 Cola</span>
+                  <span style="color: #34d399; font-weight: 600;">92.8% objetivo</span>
+                </div>
+              </div>
+
+              <div class="kpi-mini-card">
+                <div class="kpi-mini-top">
+                  <span class="kpi-mini-title">Ticket Promedio</span>
+                  <span class="kpi-mini-tag tag-purple">▲ +S/ 34.00</span>
+                </div>
+                <div class="kpi-mini-value" style="color: #c084fc;">S/ 421.70</div>
+                <div class="kpi-mini-progress">
+                  <div class="kpi-progress-bar" style="width: 85%; background: linear-gradient(90deg, #a855f7, #c084fc);"></div>
+                </div>
+                <div class="kpi-mini-bottom">
+                  <span>Margen Comercial: 58.4%</span>
+                  <span style="color: #c084fc; font-weight: 600;">Lunas Premium 48%</span>
+                </div>
+              </div>
+
+              <div class="kpi-mini-card">
+                <div class="kpi-mini-top">
+                  <span class="kpi-mini-title">Proyección Cierre</span>
+                  <span class="kpi-mini-tag tag-warning">Ritmo S/ 2,108/día</span>
+                </div>
+                <div class="kpi-mini-value" style="color: #fbbf24;">S/ 62,500.00</div>
+                <div class="kpi-mini-progress">
+                  <div class="kpi-progress-bar" style="width: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24);"></div>
+                </div>
+                <div class="kpi-mini-bottom">
+                  <span>Superávit estimado</span>
+                  <span style="color: #fbbf24; font-weight: 600;">+4.2% sobre meta</span>
+                </div>
+              </div>
             </div>
-            <div class="chart-card col-12">
-              <div class="chart-header"><div class="chart-title-wrap"><h3>Tratamientos y Filtros Oftálmicos Más Demandados</h3><p>Volumen de lunas solicitadas por tipo de protección visual</p></div></div>
-              <div class="chart-container-inner" style="min-height: 240px;"><canvas id="chartTreatments"></canvas></div>
+
+            <!-- CONTENIDO GRÁFICO MES ACTUAL + MIX DE VENTAS -->
+            <div class="charts-grid" style="margin-top: 0.25rem;">
+              <div class="chart-card col-8" style="margin-bottom: 0;">
+                <div class="chart-header">
+                  <div class="chart-title-wrap">
+                    <h3>Ingresos Semanales del Mes vs Meta</h3>
+                    <p>Avance acumulativo por semana del mes de Marzo 2026 (S/)</p>
+                  </div>
+                  <span class="nav-badge-pill" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8; font-weight: 700;">Semana 4 en marcha</span>
+                </div>
+                <div class="chart-container-inner" style="min-height: 250px;">
+                  <canvas id="chartCurrentMonthWeekly"></canvas>
+                </div>
+              </div>
+
+              <div class="chart-card col-4" style="margin-bottom: 0;">
+                <div class="chart-header">
+                  <div class="chart-title-wrap">
+                    <h3>Mix de Facturación (Marzo)</h3>
+                    <p>Distribución por categoría en el mes actual</p>
+                  </div>
+                </div>
+                <div class="category-breakdown-list">
+                  <div class="category-item">
+                    <div class="cat-info">
+                      <span class="cat-name">👓 Monturas Oftálmicas</span>
+                      <span class="cat-amount">S/ 24,120.00 (44%)</span>
+                    </div>
+                    <div class="cat-bar"><div class="cat-fill" style="width: 44%; background: #0ea5e9;"></div></div>
+                  </div>
+                  <div class="category-item">
+                    <div class="cat-info">
+                      <span class="cat-name">🔬 Lunas &amp; Tratamientos</span>
+                      <span class="cat-amount">S/ 21,930.00 (40%)</span>
+                    </div>
+                    <div class="cat-bar"><div class="cat-fill" style="width: 40%; background: #10b981;"></div></div>
+                  </div>
+                  <div class="category-item">
+                    <div class="cat-info">
+                      <span class="cat-name">☀️ Gafas de Sol Polarizadas</span>
+                      <span class="cat-amount">S/ 6,030.00 (11%)</span>
+                    </div>
+                    <div class="cat-bar"><div class="cat-fill" style="width: 11%; background: #f59e0b;"></div></div>
+                  </div>
+                  <div class="category-item">
+                    <div class="cat-info">
+                      <span class="cat-name">🧴 Accesorios &amp; Consultas</span>
+                      <span class="cat-amount">S/ 2,740.00 (5%)</span>
+                    </div>
+                    <div class="cat-bar"><div class="cat-fill" style="width: 5%; background: #a855f7;"></div></div>
+                  </div>
+
+                  <div style="margin-top: 0.75rem; padding: 0.75rem; background: rgba(255, 255, 255, 0.03); border-radius: var(--radius-sm); border-left: 3px solid #38bdf8;">
+                    <div style="font-size: 0.74rem; color: var(--admin-text-muted); font-weight: 700;">TOP PRODUCTO DEL MES:</div>
+                    <div style="font-size: 0.88rem; font-weight: 700; color: #ffffff; margin-top: 0.15rem;">Miraflex Kids Azul + Blue Protect</div>
+                    <div style="font-size: 0.74rem; color: #38bdf8; margin-top: 0.15rem;">22 unidades vendidas (S/ 7,480.00)</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======================================================== -->
+          <!-- PANEL 2: ESTADÍSTICAS DE LOS ÚLTIMOS 3 MESES (TRIMESTRE) -->
+          <!-- ======================================================== -->
+          <div class="analytics-section-card accent-quarterly" id="analyticsPanelLast3Months" style="margin-top: 1.5rem;">
+            <div class="analytics-section-header">
+              <div class="analytics-header-left">
+                <div class="analytics-section-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;">
+                  ${LG.icon('calendar', { size: 22, sw: 2.2 })}
+                </div>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.55rem; flex-wrap: wrap;">
+                    <h3 class="analytics-section-title">Estadísticas de los Últimos 3 Meses (Enero – Marzo 2026)</h3>
+                    <span class="analytics-badge badge-quarter">📅 Trimestre I - 2026</span>
+                    <span class="analytics-badge badge-growth">📈 Crecimiento +13.7%</span>
+                    <span class="analytics-badge badge-target">⭐ 96.5% Meta Trimestral</span>
+                  </div>
+                  <p class="analytics-section-sub">Consolidado trimestral de ventas, órdenes despachadas, comparativa mes a mes y tasa de retención de pacientes.</p>
+                </div>
+              </div>
+              <div class="analytics-header-right">
+                <div class="analytics-stat-pill">
+                  <span class="stat-pill-label">Total Trimestre (Q1)</span>
+                  <strong class="stat-pill-value" style="color: #34d399;">S/ 154,420.00</strong>
+                </div>
+              </div>
+            </div>
+
+            <!-- KPIs ÚLTIMOS 3 MESES -->
+            <div class="analytics-kpis-grid">
+              <div class="kpi-mini-card">
+                <div class="kpi-mini-top">
+                  <span class="kpi-mini-title">Ingreso Consolidado (3M)</span>
+                  <span class="kpi-mini-tag tag-success">▲ +13.7% Trimestral</span>
+                </div>
+                <div class="kpi-mini-value" style="color: #34d399;">S/ 154,420.00</div>
+                <div class="kpi-mini-progress">
+                  <div class="kpi-progress-bar" style="width: 96.5%; background: linear-gradient(90deg, #059669, #10b981);"></div>
+                </div>
+                <div class="kpi-mini-bottom">
+                  <span>Meta Trimestre: S/ 160,000</span>
+                  <span style="color: #34d399; font-weight: 600;">96.5% alcanzado</span>
+                </div>
+              </div>
+
+              <div class="kpi-mini-card">
+                <div class="kpi-mini-top">
+                  <span class="kpi-mini-title">Órdenes Consolidadas</span>
+                  <span class="kpi-mini-tag tag-info">358 órdenes</span>
+                </div>
+                <div class="kpi-mini-value" style="color: #38bdf8;">358 <span style="font-size: 0.92rem; font-weight: 500; color: var(--admin-text-muted);">órdenes</span></div>
+                <div class="kpi-mini-progress">
+                  <div class="kpi-progress-bar" style="width: 95.4%; background: linear-gradient(90deg, #0284c7, #0ea5e9);"></div>
+                </div>
+                <div class="kpi-mini-bottom">
+                  <span>Promedio: 119.3 ord/mes</span>
+                  <span style="color: #38bdf8; font-weight: 600;">95.4% entregas a tiempo</span>
+                </div>
+              </div>
+
+              <div class="kpi-mini-card">
+                <div class="kpi-mini-top">
+                  <span class="kpi-mini-title">Ticket Promedio Trimestral</span>
+                  <span class="kpi-mini-tag tag-purple">Estabilidad Alta</span>
+                </div>
+                <div class="kpi-mini-value" style="color: #818cf8;">S/ 431.34</div>
+                <div class="kpi-mini-progress">
+                  <div class="kpi-progress-bar" style="width: 90%; background: linear-gradient(90deg, #4f46e5, #818cf8);"></div>
+                </div>
+                <div class="kpi-mini-bottom">
+                  <span>Rango: S/ 421 - S/ 438</span>
+                  <span style="color: #818cf8; font-weight: 600;">Margen: 58.2%</span>
+                </div>
+              </div>
+
+              <div class="kpi-mini-card">
+                <div class="kpi-mini-top">
+                  <span class="kpi-mini-title">Retención de Pacientes</span>
+                  <span class="kpi-mini-tag tag-pink">Fidelización</span>
+                </div>
+                <div class="kpi-mini-value" style="color: #f472b6;">78.4%</div>
+                <div class="kpi-mini-progress">
+                  <div class="kpi-progress-bar" style="width: 78.4%; background: linear-gradient(90deg, #db2777, #f472b6);"></div>
+                </div>
+                <div class="kpi-mini-bottom">
+                  <span>342 pacientes únicos</span>
+                  <span style="color: #f472b6; font-weight: 600;">268 recompras/citas</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- CONTENIDO GRÁFICO TRIMESTRAL + COMPARATIVA MES A MES -->
+            <div class="charts-grid" style="margin-top: 0.25rem;">
+              <div class="chart-card col-8" style="margin-bottom: 0;">
+                <div class="chart-header">
+                  <div class="chart-title-wrap">
+                    <h3>Comparativa de Facturación y Órdenes (Ene - Feb - Mar 2026)</h3>
+                    <p>Facturación total (barras S/) y volumen de órdenes atendidas (línea azul)</p>
+                  </div>
+                  <span class="nav-badge-pill" style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-weight: 700;">+13.7% Trimestral</span>
+                </div>
+                <div class="chart-container-inner" style="min-height: 250px;">
+                  <canvas id="chartQuarterlyComparison"></canvas>
+                </div>
+              </div>
+
+              <div class="chart-card col-4" style="margin-bottom: 0;">
+                <div class="chart-header">
+                  <div class="chart-title-wrap">
+                    <h3>Desglose Mes a Mes</h3>
+                    <p>Evolución intermensual del trimestre</p>
+                  </div>
+                </div>
+                <div class="month-comparison-list">
+                  <!-- Enero -->
+                  <div class="month-row-item">
+                    <div class="month-row-header">
+                      <strong class="month-row-name">Enero 2026</strong>
+                      <span class="month-row-total">S/ 48,200.00</span>
+                    </div>
+                    <div class="month-row-metrics">
+                      <span>📦 110 órdenes</span>
+                      <span>🎟️ Ticket: S/ 438.18</span>
+                      <span class="badge-mini-neutral">Base Q1</span>
+                    </div>
+                    <div class="month-row-progress"><div class="fill" style="width: 87.9%; background: #64748b;"></div></div>
+                  </div>
+
+                  <!-- Febrero -->
+                  <div class="month-row-item">
+                    <div class="month-row-header">
+                      <strong class="month-row-name">Febrero 2026</strong>
+                      <span class="month-row-total">S/ 51,400.00</span>
+                    </div>
+                    <div class="month-row-metrics">
+                      <span>📦 118 órdenes</span>
+                      <span>🎟️ Ticket: S/ 435.59</span>
+                      <span class="badge-mini-up">▲ +6.6%</span>
+                    </div>
+                    <div class="month-row-progress"><div class="fill" style="width: 93.8%; background: #0ea5e9;"></div></div>
+                  </div>
+
+                  <!-- Marzo -->
+                  <div class="month-row-item highlighted">
+                    <div class="month-row-header">
+                      <strong class="month-row-name">Marzo 2026 (Actual)</strong>
+                      <span class="month-row-total" style="color: #34d399;">S/ 54,820.00</span>
+                    </div>
+                    <div class="month-row-metrics">
+                      <span>📦 130 órdenes</span>
+                      <span>🎟️ Ticket: S/ 421.70</span>
+                      <span class="badge-mini-up">▲ +6.7%</span>
+                    </div>
+                    <div class="month-row-progress"><div class="fill" style="width: 100%; background: #10b981;"></div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ======================================================== -->
+          <!-- GRÁFICOS DE DEMANDA GLOBAL Y PARTICIPACIÓN -->
+          <!-- ======================================================== -->
+          <div style="margin-top: 1.5rem;">
+            <div style="margin-bottom: 1rem;">
+              <h3 style="font-size: 1.05rem; font-weight: 700; color: #ffffff; margin: 0;">Análisis Detallado de Demanda &amp; Tratamientos Oftálmicos</h3>
+              <p style="font-size: 0.8rem; color: var(--admin-text-muted); margin: 0.2rem 0 0 0;">Participación por marcas autorizadas y preferencias en lunas de laboratorio.</p>
+            </div>
+            <div class="charts-grid">
+              <div class="chart-card col-4">
+                <div class="chart-header">
+                  <div class="chart-title-wrap">
+                    <h3>Participación por Marca</h3>
+                    <p>Distribución de órdenes en tienda</p>
+                  </div>
+                </div>
+                <div class="chart-container-inner"><canvas id="chartBrandShare"></canvas></div>
+              </div>
+              <div class="chart-card col-8">
+                <div class="chart-header">
+                  <div class="chart-title-wrap">
+                    <h3>Tratamientos y Filtros Oftálmicos Más Demandados</h3>
+                    <p>Volumen de lunas solicitadas por tipo de protección visual</p>
+                  </div>
+                </div>
+                <div class="chart-container-inner" style="min-height: 250px;"><canvas id="chartTreatments"></canvas></div>
+              </div>
             </div>
           </div>
         </section>

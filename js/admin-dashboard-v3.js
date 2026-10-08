@@ -1098,57 +1098,65 @@ window.renderSales = function() {
   tbody.innerHTML = list.map(s => {
     const isPaid = s.estado === 'Pagado';
     const badgeClass = isPaid ? 'badge-listo' : 'badge-proceso';
-    const docPillColor = s.clienteDocTipo === 'RUC' ? '#38bdf8' : '#10b981';
+    const docPillColor = s.clienteDocTipo === 'RUC' ? '#0284c7' : '#059669';
+    const docPillBg = s.clienteDocTipo === 'RUC' ? 'rgba(2, 132, 199, 0.12)' : 'rgba(5, 150, 105, 0.12)';
 
     return `
       <tr>
-        <td>
-          <div style="font-weight: 800; font-family: monospace; color: var(--admin-primary); font-size: 0.95rem;">
+        <td style="white-space: nowrap;">
+          <div style="font-weight: 800; font-family: monospace; color: var(--admin-primary); font-size: 0.92rem; letter-spacing: 0.02em;">
             ${s.correlativo}
           </div>
-          <span style="font-size: 0.72rem; color: var(--admin-text-dim); text-transform: uppercase; font-weight: 600;">
+          <span style="font-size: 0.7rem; color: var(--admin-text-dim); text-transform: uppercase; font-weight: 600; display: block; margin-top: 0.15rem;">
             ${s.tipoDoc === 'factura' ? 'Factura Electrónica' : s.tipoDoc === 'boleta' ? 'Boleta Electrónica' : 'Nota de Venta'}
           </span>
         </td>
-        <td>
-          <span style="font-size: 0.82rem; color: var(--admin-text-muted);">${s.fechaHora}</span>
+        <td style="white-space: nowrap;">
+          <span style="font-size: 0.84rem; color: var(--admin-text-muted); font-weight: 600;">${s.fechaHora}</span>
         </td>
-        <td>
-          <div style="font-weight: 700; color: var(--admin-text-main); font-size: 0.88rem;">${s.clienteNombre}</div>
-          ${s.clienteTelefono ? `<div style="font-size: 0.75rem; color: var(--admin-text-dim);">📞 ${s.clienteTelefono}</div>` : ''}
+        <td style="min-width: 200px;">
+          <div style="font-weight: 700; color: var(--admin-text-main); font-size: 0.88rem; line-height: 1.3;">
+            ${s.clienteNombre}
+          </div>
+          ${s.clienteTelefono ? `
+            <div style="font-size: 0.76rem; color: var(--admin-text-dim); margin-top: 0.2rem; display: inline-flex; align-items: center; gap: 0.3rem;">
+              <span>📞</span>
+              <span style="font-weight: 500;">${s.clienteTelefono}</span>
+            </div>
+          ` : ''}
         </td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 0.3rem;">
-            <code style="font-size: 0.82rem; color: var(--admin-text-main); font-weight: 700;">${s.clienteDocNumero}</code>
-            <span style="font-size: 0.68rem; padding: 0.1rem 0.35rem; border-radius: 4px; background: rgba(56, 189, 248, 0.1); color: ${docPillColor}; font-weight: 700;">
+        <td style="white-space: nowrap;">
+          <div style="display: inline-flex; align-items: center; gap: 0.4rem;">
+            <code style="font-size: 0.84rem; color: var(--admin-text-main); font-weight: 700; background: var(--admin-bg-alt); padding: 0.2rem 0.45rem; border-radius: 4px; border: 1px solid var(--admin-card-border); letter-spacing: 0.03em;">${s.clienteDocNumero}</code>
+            <span style="font-size: 0.68rem; padding: 0.15rem 0.45rem; border-radius: 4px; background: ${docPillBg}; color: ${docPillColor}; font-weight: 800; border: 1px solid ${docPillColor}33;">
               ${s.clienteDocTipo}
             </span>
           </div>
         </td>
-        <td style="max-width: 220px;">
-          <div style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        <td style="min-width: 220px;">
+          <div style="font-size: 0.84rem; color: var(--admin-text-main); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;" title="${s.monturaNombre}">
             👓 ${s.monturaNombre}
           </div>
-          <div style="font-size: 0.72rem; color: var(--admin-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+          <div style="font-size: 0.74rem; color: var(--admin-primary); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px; margin-top: 0.15rem;" title="${s.lunasNombre}">
             🔬 ${s.lunasNombre}
           </div>
         </td>
-        <td>
-          <strong style="color: #34d399; font-size: 0.95rem;">S/ ${Number(s.total).toFixed(2)}</strong>
-          <div style="font-size: 0.7rem; color: var(--admin-text-dim);">${s.metodoPago}</div>
+        <td style="white-space: nowrap;">
+          <strong style="color: #10b981; font-size: 0.95rem; font-weight: 800;">S/ ${Number(s.total).toFixed(2)}</strong>
+          <div style="font-size: 0.72rem; color: var(--admin-text-dim); font-weight: 600; text-transform: capitalize;">${s.metodoPago}</div>
         </td>
-        <td>
+        <td style="white-space: nowrap;">
           <span class="badge-status ${badgeClass}">${s.estado}</span>
         </td>
-        <td style="text-align: right;">
-          <div style="display: flex; gap: 0.35rem; justify-content: flex-end;">
-            <button type="button" class="btn-decision-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Ver Comprobante" onclick="openInvoiceModal('${s.id}')">
+        <td style="text-align: right; white-space: nowrap;">
+          <div style="display: inline-flex; gap: 0.35rem; justify-content: flex-end;">
+            <button type="button" class="btn-table-action" title="Ver Comprobante Electrónico" onclick="openInvoiceModal('${s.id}')">
               Ver
             </button>
-            <button type="button" class="btn-decision-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem; color: #25d366; border-color: rgba(37, 211, 102, 0.3);" title="Enviar por WhatsApp" onclick="sendInvoiceWhatsApp('${s.id}')">
+            <button type="button" class="btn-table-action btn-wa" title="Enviar por WhatsApp" onclick="sendInvoiceWhatsApp('${s.id}')">
               WA
             </button>
-            <button type="button" class="btn-decision-action" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" title="Imprimir" onclick="printInvoiceById('${s.id}')">
+            <button type="button" class="btn-table-action" title="Imprimir Comprobante" onclick="printInvoiceById('${s.id}')">
               🖨️
             </button>
           </div>
@@ -2720,7 +2728,191 @@ function renderCharts() {
       }
     });
   }
+
+  // --- NUEVO: Gráfico del Mes Actual (Ingresos Semanales vs Meta) ---
+  const ctxMonthWeekly = document.getElementById('chartCurrentMonthWeekly');
+  if (ctxMonthWeekly) {
+    if (state.charts.currentMonthWeekly) state.charts.currentMonthWeekly.destroy();
+
+    state.charts.currentMonthWeekly = new Chart(ctxMonthWeekly, {
+      type: 'bar',
+      data: {
+        labels: ['Sem 1 (1-7 Mar)', 'Sem 2 (8-14 Mar)', 'Sem 3 (15-21 Mar)', 'Sem 4 (22-31 Mar)'],
+        datasets: [
+          {
+            label: 'Ingresos Reales (S/)',
+            data: [11200, 14500, 13800, 15320],
+            backgroundColor: '#0ea5e9',
+            hoverBackgroundColor: '#38bdf8',
+            borderRadius: 6,
+            maxBarThickness: 44,
+            order: 2
+          },
+          {
+            label: 'Meta Semanal (S/)',
+            data: [12000, 13000, 14000, 15000],
+            type: 'line',
+            borderColor: '#fbbf24',
+            borderDash: [5, 5],
+            borderWidth: 2.5,
+            pointBackgroundColor: '#fbbf24',
+            pointRadius: 5,
+            fill: false,
+            order: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: '#cbd5e1', font: { family: 'Inter', weight: '600' }, boxWidth: 12, padding: 12 }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.dataset.label}: S/ ${Number(ctx.raw).toLocaleString('es-PE')}`
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#94a3b8' } },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: {
+              color: '#94a3b8',
+              callback: (val) => 'S/ ' + (val >= 1000 ? (val / 1000) + 'k' : val)
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // --- NUEVO: Gráfico de los Últimos 3 Meses (Trimestre I 2026: Ene, Feb, Mar) ---
+  const ctxQuarterly = document.getElementById('chartQuarterlyComparison');
+  if (ctxQuarterly) {
+    if (state.charts.quarterlyComparison) state.charts.quarterlyComparison.destroy();
+
+    state.charts.quarterlyComparison = new Chart(ctxQuarterly, {
+      type: 'bar',
+      data: {
+        labels: ['Enero 2026', 'Febrero 2026', 'Marzo 2026 (Actual)'],
+        datasets: [
+          {
+            label: 'Facturación Mensual (S/)',
+            data: [48200, 51400, 54820],
+            backgroundColor: ['rgba(14, 165, 233, 0.85)', 'rgba(56, 189, 248, 0.85)', 'rgba(16, 185, 129, 0.9)'],
+            hoverBackgroundColor: ['#0ea5e9', '#38bdf8', '#10b981'],
+            borderRadius: 8,
+            maxBarThickness: 62,
+            yAxisID: 'y',
+            order: 2
+          },
+          {
+            label: 'Órdenes Atendidas',
+            data: [110, 118, 130],
+            type: 'line',
+            borderColor: '#a855f7',
+            pointBackgroundColor: '#c084fc',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 1.5,
+            pointRadius: 6,
+            pointHoverRadius: 8,
+            borderWidth: 3,
+            tension: 0.35,
+            fill: false,
+            yAxisID: 'y1',
+            order: 1
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          mode: 'index',
+          intersect: false
+        },
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { color: '#cbd5e1', font: { family: 'Inter', weight: '600' }, boxWidth: 12, padding: 12 }
+          },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                if (ctx.dataset.yAxisID === 'y') {
+                  return ` ${ctx.dataset.label}: S/ ${Number(ctx.raw).toLocaleString('es-PE')}`;
+                }
+                return ` ${ctx.dataset.label}: ${ctx.raw} órdenes`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { weight: '600' } } },
+          y: {
+            type: 'linear',
+            display: true,
+            position: 'left',
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: {
+              color: '#94a3b8',
+              callback: (val) => 'S/ ' + (val >= 1000 ? (val / 1000) + 'k' : val)
+            }
+          },
+          y1: {
+            type: 'linear',
+            display: true,
+            position: 'right',
+            grid: { drawOnChartArea: false },
+            min: 80,
+            max: 150,
+            ticks: {
+              color: '#c084fc',
+              callback: (val) => val + ' ord'
+            }
+          }
+        }
+      }
+    });
+  }
 }
+
+// Filtro interactivo de paneles en la vista de Analítica
+function filterAnalyticsPanel(panelId) {
+  const pCurrent = document.getElementById('analyticsPanelCurrentMonth');
+  const pQuarter = document.getElementById('analyticsPanelLast3Months');
+  const pills = document.querySelectorAll('#analyticsNavPills .analytics-pill');
+  pills.forEach(p => p.classList.remove('active'));
+
+  if (panelId === 'current-month') {
+    if (pCurrent) pCurrent.style.display = 'block';
+    if (pQuarter) pQuarter.style.display = 'none';
+    const activeBtn = document.querySelector('[data-panel-filter="current-month"]');
+    if (activeBtn) activeBtn.classList.add('active');
+  } else if (panelId === 'last-3-months') {
+    if (pCurrent) pCurrent.style.display = 'none';
+    if (pQuarter) pQuarter.style.display = 'block';
+    const activeBtn = document.querySelector('[data-panel-filter="last-3-months"]');
+    if (activeBtn) activeBtn.classList.add('active');
+  } else {
+    if (pCurrent) pCurrent.style.display = 'block';
+    if (pQuarter) pQuarter.style.display = 'block';
+    const activeBtn = document.querySelector('[data-panel-filter="all"]');
+    if (activeBtn) activeBtn.classList.add('active');
+  }
+
+  // Redimensionar gráficos con suavidad tras alternar paneles
+  setTimeout(() => {
+    if (typeof renderCharts === 'function') {
+      renderCharts();
+    }
+  }, 50);
+}
+window.filterAnalyticsPanel = filterAnalyticsPanel;
 
 // ==========================================================================
 // 9. SIMULADOR DE ESCENARIOS (WHAT-IF)
