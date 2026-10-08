@@ -2576,29 +2576,36 @@ function renderCharts() {
     state.charts.salesProducts = new Chart(ctxSalesProducts, {
       type: 'bar',
       data: {
-        labels: ['Miraflex Azul', 'Nano TR90', 'Ray-Ban Kids', 'InkaLens', 'Miraflex Lila'],
+        labels: ['Miraflex Azul', 'Nano Vista TR90', 'Ray-Ban Kids', 'InkaLens Titanium', 'Miraflex Lila', 'Ray-Ban Wayfarer', 'Oakley Holbrook'],
         datasets: [{
           label: 'Unidades Vendidas',
-          data: [14, 8, 5, 3, 2],
+          data: [14, 9, 7, 5, 4, 3, 2],
           backgroundColor: '#0ea5e9',
-          borderRadius: 4
+          hoverBackgroundColor: '#38bdf8',
+          borderRadius: 6,
+          maxBarThickness: 52
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false }
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` ${ctx.parsed.y} unidades vendidas`
+            }
+          }
         },
         scales: {
           y: { 
             beginAtZero: true, 
-            grid: { color: 'rgba(0,0,0,0.05)' },
-            ticks: { color: '#64748b' }
+            grid: { color: 'rgba(255,255,255,0.06)' },
+            ticks: { color: '#94a3b8', precision: 0 }
           },
           x: { 
             grid: { display: false },
-            ticks: { color: '#475569', font: { weight: '600' }, maxRotation: 45, minRotation: 45 }
+            ticks: { color: '#cbd5e1', font: { weight: '600', size: 12 }, maxRotation: 0, minRotation: 0 }
           }
         }
       }

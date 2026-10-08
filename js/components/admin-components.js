@@ -277,40 +277,50 @@
             </div>
           </div>
 
-          <div class="charts-grid" style="margin-top: 1.5rem;">
-            <div class="chart-card col-4">
-              <div class="chart-header"><h3>Top Productos Más Vendidos</h3></div>
-              <div class="chart-container-inner" style="height: 300px; padding: 1rem;">
-                <canvas id="salesProductsChart"></canvas>
+          <!-- 1. Top Productos Más Vendidos (Arriba) -->
+          <div class="chart-card" style="margin-top: 1.5rem;">
+            <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 style="margin: 0;">Top Productos Más Vendidos</h3>
+                <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: var(--admin-text-muted);">Ranking de monturas y tratamientos con mayor rotación comercial en Trujillo.</p>
+              </div>
+              <span class="nav-badge-pill" style="background: rgba(14, 165, 233, 0.15); color: #0ea5e9; font-weight: 700;">📊 Demanda Semanal</span>
+            </div>
+            <div class="chart-container-inner" style="height: 250px; padding: 1rem 1.25rem;">
+              <canvas id="salesProductsChart"></canvas>
+            </div>
+          </div>
+
+          <!-- 2. Transacciones y Comprobantes (Debajo a ancho completo) -->
+          <div class="chart-card" style="margin-top: 1.5rem;">
+            <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+              <div>
+                <h3 style="margin: 0;">Transacciones y Comprobantes</h3>
+                <p style="margin: 0.2rem 0 0 0; font-size: 0.8rem; color: var(--admin-text-muted);">Registro de boletas electrónicas (B001), facturas (F001) y notas de venta.</p>
+              </div>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                <input type="text" id="salesSearchInput" class="form-input" placeholder="Buscar por comprobante, cliente o doc..." style="font-size: 0.85rem; padding: 0.45rem 0.9rem; width: 280px;">
+                <button type="button" class="btn-primary-action" style="padding: 0.45rem 1rem; font-size: 0.85rem;" onclick="openNewSaleModal()">+ Emitir</button>
               </div>
             </div>
-            <div class="chart-card col-8">
-              <div class="chart-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
-                <h3>Transacciones y Comprobantes</h3>
-                <div style="display: flex; gap: 0.5rem; align-items: center;">
-                  <input type="text" id="salesSearchInput" class="form-input" placeholder="Buscar por comprobante, cliente o doc..." style="font-size: 0.82rem; padding: 0.35rem 0.75rem; width: 230px;">
-                  <button type="button" class="btn-primary-action" style="padding: 0.35rem 0.75rem; font-size: 0.8rem;" onclick="openNewSaleModal()">+ Emitir</button>
-                </div>
-              </div>
-              <div class="table-responsive" style="border: none;">
-                <table class="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Comprobante</th>
-                      <th>Fecha / Hora</th>
-                      <th>Cliente / Razón Social</th>
-                      <th>DNI / RUC</th>
-                      <th>Detalle</th>
-                      <th>Total</th>
-                      <th>Estado</th>
-                      <th style="text-align: right;">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody id="salesTableBody">
-                    <tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">Cargando historial de ventas...</td></tr>
-                  </tbody>
-                </table>
-              </div>
+            <div class="table-responsive" style="border: none; margin-top: 0.5rem;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Comprobante</th>
+                    <th>Fecha / Hora</th>
+                    <th>Cliente / Razón Social</th>
+                    <th>DNI / RUC</th>
+                    <th>Detalle</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th style="text-align: right;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="salesTableBody">
+                  <tr><td colspan="8" style="text-align: center; padding: 2rem; color: var(--admin-text-muted);">Cargando historial de ventas...</td></tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>
